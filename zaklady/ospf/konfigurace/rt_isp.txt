@@ -1,0 +1,17 @@
+enable
+configure terminal
+hostname ISP
+
+interface GigabitEthernet0/0
+ ip address 192.168.0.18 255.255.255.252
+ ipv6 address 2001:DB8:FACE:5::2/64
+ no shutdown
+exit
+
+ip route 172.16.0.0 255.255.248.0 192.168.0.17
+ip route 192.168.0.0 255.255.255.240 192.168.0.17
+ipv6 route 2001:DB8:FACE::/48 2001:DB8:FACE:5::1
+ipv6 route 2001:DB8:CAFE::/48 2001:DB8:FACE:5::1
+
+end
+write

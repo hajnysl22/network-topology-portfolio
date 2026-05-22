@@ -1,0 +1,65 @@
+enable
+configure terminal
+hostname R1
+ipv6 unicast-routing
+
+ip dhcp excluded-address 172.16.1.1
+ip dhcp pool LAN1-V4
+ network 172.16.1.0 255.255.255.0
+ default-router 172.16.1.1
+ dns-server 8.8.8.8
+
+ipv6 dhcp pool LAN1-V6
+ address prefix 2001:DB8:CAFE:1::/64
+ dns-server 2001:4860:4860::8888
+
+interface GigabitEthernet0/1
+ ip address 192.168.0.17 255.255.255.252
+ ipv6 address 2001:DB8:FACE:5::1/64
+ ipv6 address FE80::1 link-local
+ no shutdown
+
+interface GigabitEthernet0/0
+ ip address 172.16.1.1 255.255.255.0
+ ipv6 address 2001:DB8:CAFE:1::1/64
+ ipv6 address FE80::1 link-local
+ ipv6 ospf 1 area 0
+ ipv6 dhcp server LAN1-V6
+ ipv6 nd managed-config-flag
+ no shutdown
+
+interface GigabitEthernet0/0/0
+ ip address 192.168.0.1 255.255.255.252
+ ipv6 address 2001:DB8:FACE:1::1/64
+ ipv6 address FE80::1 link-local
+ ip ospf network point-to-point
+ ipv6 ospf 1 area 0
+ ipv6 ospf network point-to-point
+ no shutdown
+
+interface GigabitEthernet0/1/0
+ ip address 192.168.0.14 255.255.255.252
+ ipv6 address 2001:DB8:FACE:4::2/64
+ ipv6 address FE80::1 link-local
+ ip ospf network point-to-point
+ ipv6 ospf 1 area 0
+ ipv6 ospf network point-to-point
+ no shutdown
+exit
+
+ip route 0.0.0.0 0.0.0.0 192.168.0.18
+ipv6 route ::/0 2001:DB8:FACE:5::2
+
+router ospf 1
+ router-id 1.1.1.1
+ network 172.16.1.0 0.0.0.255 area 0
+ network 192.168.0.0 0.0.0.3 area 0
+ network 192.168.0.12 0.0.0.3 area 0
+ passive-interface GigabitEthernet0/0
+ default-information originate
+
+ipv6 router ospf 1
+ router-id 1.1.1.1
+ passive-interface GigabitEthernet0/0
+ default-information originate
+do write

@@ -1,0 +1,42 @@
+enable
+configure terminal
+	hostname R1
+	interface GigabitEthernet 0/0/0
+		no shutdown
+	interface GigabitEthernet 0/0/0.10
+		encapsulation dot1Q 10
+		ip address 192.168.10.253 255.255.255.0
+		standby 10 ip 192.168.10.1
+		standby 10 priority 150
+		standby 10 preempt
+	interface GigabitEthernet 0/0/0.20
+		encapsulation dot1Q 20
+		ip address 192.168.20.253 255.255.255.0
+		standby 20 ip 192.168.20.1
+		standby 20 priority 150
+		standby 20 preempt
+	interface GigabitEthernet 0/0/1
+		ip address 192.168.0.253 255.255.255.0
+		standby 1 ip 192.168.0.1
+		standby 1 priority 150
+		standby 1 preempt
+		no shutdown
+
+	ip dhcp excluded-address 192.168.10.1 
+	ip dhcp excluded-address 192.168.20.1 
+	ip dhcp excluded-address 192.168.10.128 192.168.10.254
+	ip dhcp excluded-address 192.168.20.128 192.168.20.254
+
+	ip dhcp pool VLAN-10
+		network 192.168.10.0 255.255.255.0
+		default-router 192.168.10.1		
+	ip dhcp pool VLAN-20
+		network 192.168.20.0 255.255.255.0
+		default-router 192.168.20.1	
+		exit	
+	end
+	show vlan 
+	show ip interface brief
+	show standby brief
+	show ip dhcp binding
+write

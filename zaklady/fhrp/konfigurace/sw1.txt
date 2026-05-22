@@ -1,0 +1,22 @@
+enable
+configure terminal
+	hostname SW1
+	vlan 10
+		name VLAN-10
+	vlan 20
+		name VLAN-20
+	spanning-tree mode rapid-pvst
+	spanning-tree portfast default
+	interface range fastEthernet 0/1 - 12
+		switchport mode access
+		switchport access vlan 10
+	interface range fastEthernet 0/13 - 24
+		switchport mode access
+		switchport access vlan 20
+	interface range gigabitEthernet 0/1 - 2
+		switchport mode trunk
+		switchport trunk allowed vlan 10,20
+	end
+	show vlan 
+	show ip interface brief
+write

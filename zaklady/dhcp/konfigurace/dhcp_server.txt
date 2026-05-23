@@ -1,0 +1,14 @@
+Nastavit IP adresu na 192.168.30.254/24
+Default Gateway 192.168.30.1
+
+Services > DHCP
+Service On 
+Zde Vytvorit Pooly:
+	VLAN-10 Default Gateway 192.168.10.1
+		subnet 255.255.255.0
+		pocet hostu 100
+			Add
+	VLAN-20 Default Gateway 192.168.20.1
+		subnet 255.255.255.0
+		pocet hostu 100
+			Add

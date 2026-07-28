@@ -78,6 +78,8 @@ configure terminal
         no shutdown
     interface Loopback0
         ip address 2.2.2.1 255.255.255.255
+    interface range FastEthernet 1/0, FastEthernet 2/0, FastEthernet 3/0
+        duplex full
     end
 write
 show ip interface brief
@@ -109,6 +111,8 @@ configure terminal
         no shutdown
     interface Loopback0
         ip address 2.2.2.2 255.255.255.255
+    interface range FastEthernet 1/0, FastEthernet 2/0, FastEthernet 3/0
+        duplex full
     end
 write
 show ip interface brief
@@ -133,6 +137,9 @@ configure terminal
     interface Loopback0
         ip address 3.3.3.1 255.255.255.255
         no shutdown
+    interface range FastEthernet 0/0 - 1
+        speed 100
+        duplex full
     end
 write
 show ip interface brief
@@ -157,6 +164,9 @@ configure terminal
     interface Loopback0
         ip address 3.3.3.2 255.255.255.255
         no shutdown
+    interface range FastEthernet 0/0 - 1
+        speed 100
+        duplex full
     end
 write
 show ip interface brief
@@ -181,6 +191,9 @@ configure terminal
     interface Loopback0
         ip address 3.3.3.3 255.255.255.255
         no shutdown
+    interface range FastEthernet 0/0 - 1
+        speed 100
+        duplex full
     end
 write
 show ip interface brief
@@ -203,6 +216,7 @@ configure terminal
     hostname ACCESS-SW1
     interface Gi0/0
         description Connection to IPS/IDS
+        switchport trunk encapsulation dot1q
         switchport mode trunk
         no shutdown
     interface range Gi0/1 - 3
@@ -240,6 +254,7 @@ configure terminal
     hostname ACCESS-SW2
     interface Gi0/0
         description Connection to IPS/IDS
+        switchport trunk encapsulation dot1q
         switchport mode trunk
         no shutdown
     interface range Gi0/1 - 3
@@ -277,6 +292,7 @@ configure terminal
     hostname ACCESS-SW3
     interface Gi0/0
         description Connection to IPS/IDS
+        switchport trunk encapsulation dot1q
         switchport mode trunk
         no shutdown
     interface range Gi0/1 - 3
@@ -301,3 +317,52 @@ configure terminal
         shutdown
     end
 write
+
+IPS/IDS (ASAv)
+enable
+configure terminal
+    hostname ASAv
+    interface GigabitEthernet0/0
+        description Connection to DIST-R1
+        security-level 0
+        ip address 10.0.1.26 255.255.255.252
+        no shutdown
+    interface GigabitEthernet0/1
+        description Connection to DIST-R2
+        security-level 0
+        ip address 10.0.1.30 255.255.255.252
+        no shutdown
+    interface GigabitEthernet0/2
+        description Connection to DIST-R3
+        security-level 0
+        ip address 10.0.1.34 255.255.255.252
+        no shutdown
+    interface Redundant1
+        member-interface GigabitEthernet0/3
+        member-interface GigabitEthernet0/4
+        no shutdown
+    interface Redundant1.10
+        vlan 10
+        nameif inside-users
+        security-level 100
+        ip address 192.168.10.1 255.255.255.0
+        no shutdown
+    interface Redundant1.20
+        vlan 20
+        nameif DMZ-servers
+        security-level 50
+        ip address 192.168.20.1 255.255.255.0
+        no shutdown
+    interface Redundant1.30
+        vlan 30
+        nameif inside-wifi
+        security-level 70
+        ip address 192.168.30.1 255.255.255.0
+    interface Redundant1.99
+        vlan 99
+        nameif management
+        security-level 90
+        ip address 192.168.99.1 255.255.255.0
+        no shutdown
+    end
+write memory

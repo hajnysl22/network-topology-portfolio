@@ -36,7 +36,7 @@ ACCESS-SW3
 Gi1/2 VLAN30
 Gi1/3 VLAN999
 
-Loopback0
+Loopback0 (=router-id)
 EDGE-R1: 1.1.1.1/32
 EDGE-R2: 1.1.1.2/32
 CORE-R1: 2.2.2.1/32
@@ -44,3 +44,4 @@ CORE-R2: 2.2.2.2/32
 DIST-R1: 3.3.3.1/32
 DIST-R2: 3.3.3.2/32
 DIST-R3: 3.3.3.3/32
+ASAv: 4.4.4.4/32

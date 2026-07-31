@@ -82,6 +82,7 @@ configure terminal
         no shutdown
     interface Loopback0
         ip address 2.2.2.1 255.255.255.255
+        no shutdown
     interface range FastEthernet 1/0, FastEthernet 2/0, FastEthernet 3/0
         duplex full
     exit
@@ -128,6 +129,7 @@ configure terminal
         no shutdown
     interface Loopback0
         ip address 2.2.2.2 255.255.255.255
+        no shutdown
     interface range FastEthernet 1/0, FastEthernet 2/0, FastEthernet 3/0
         duplex full
     exit
@@ -383,21 +385,25 @@ configure terminal
         nameif outside-dist1
         security-level 0
         ip address 10.0.1.26 255.255.255.252
-        ospf network point-to-point
+        ospf network point-to-point non-broadcast
         no shutdown
     interface GigabitEthernet0/1
         description Connection to DIST-R2
         nameif outside-dist2
         security-level 0
         ip address 10.0.1.30 255.255.255.252
-        ospf network point-to-point
+        ospf network point-to-point non-broadcast
         no shutdown
     interface GigabitEthernet0/2
         description Connection to DIST-R3
         nameif outside-dist3
         security-level 0
         ip address 10.0.1.34 255.255.255.252
-        ospf network point-to-point
+        ospf network point-to-point non-broadcast
+        no shutdown
+    interface range GigabitEthernet0/3
+        no shutdown
+    interface range GigabitEthernet0/4
         no shutdown
     interface Redundant1
         member-interface GigabitEthernet0/3
@@ -420,6 +426,7 @@ configure terminal
         nameif inside-wifi
         security-level 70
         ip address 192.168.30.1 255.255.255.0
+        no shutdown
     interface Redundant1.99
         vlan 99
         nameif management
@@ -431,8 +438,11 @@ configure terminal
         router-id 4.4.4.4
         log-adj-changes
         network 10.0.1.24 255.255.255.252 area 0
+        neighbor 10.0.1.25 interface outside-dist1
         network 10.0.1.28 255.255.255.252 area 0
+        neighbor 10.0.1.29 interface outside-dist2
         network 10.0.1.32 255.255.255.252 area 0
+        neighbor 10.0.1.33 interface outside-dist3
         network 192.168.10.0 255.255.255.0 area 0
         network 192.168.20.0 255.255.255.0 area 0
         network 192.168.30.0 255.255.255.0 area 0
@@ -440,7 +450,7 @@ configure terminal
     end
 write memory
 
-Firewall (Linux - ubuntu 22.04 root root)
+Firewall (Linux - ubuntu 20.04 root root)
 sudo nano /etc/netplan/netcfg.yaml 
     {
     network:

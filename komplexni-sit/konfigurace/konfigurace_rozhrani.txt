@@ -28,14 +28,26 @@ configure terminal
     interface fa0/0
         description Connection to ISP-1
         ip address 203.0.113.2 255.255.255.252
+        ip nat outside
         no shutdown
     interface fa1/0
         description Connection to CORE-R1
+        ip nat inside
         ip address 10.0.0.1 255.255.255.252
         no shutdown
     interface Loopback0
         ip address 1.1.1.1 255.255.255.255
         no shutdown
+    exit
+
+    ip nat inside source list 1 interface fa0/0 overload
+
+    access-list 1 permit 10.0.0.0 0.255.255.255
+    access-list 1 permit 192.168.0.0 0.0.255.255
+
+    ip route 0.0.0.0 0.0.0.0 203.0.113.1
+    ip route 10.0.0.0 255.0.0.0 10.0.0.2
+    ip route 192.168.0.0 255.255.0.0 10.0.0.2
     end
 write
 show ip interface brief
@@ -47,14 +59,27 @@ configure terminal
     interface fa0/0
         description Connection to ISP-2
         ip address 203.0.113.6 255.255.255.252
+        ip nat outside
         no shutdown
     interface fa1/0
         description Connection to CORE-R2
         ip address 10.0.0.5 255.255.255.252
+        ip nat inside
         no shutdown
     interface Loopback0
         ip address 1.1.1.2 255.255.255.255
         no shutdown
+    exit
+
+    ip nat inside source list 1 interface fa0/0 overload
+
+    access-list 1 permit 10.0.0.0 0.255.255.255
+    access-list 1 permit 192.168.0.0 0.0.255.255
+
+    ip route 0.0.0.0 0.0.0.0 203.0.113.5
+    ip route 10.0.0.0 255.0.0.0 10.0.0.6
+    ip route 192.168.0.0 255.255.0.0 10.0.0.6
+
     end
 write
 show ip interface brief
@@ -94,6 +119,9 @@ configure terminal
     interface range FastEthernet 1/0, FastEthernet 2/0, FastEthernet 3/0
         duplex full
     exit
+
+    ip route 0.0.0.0 0.0.0.0 10.0.0.1 200
+
     router ospf 1
         router-id 1.1.1.1
         network 1.1.1.1 0.0.0.0 area 0
@@ -102,6 +130,7 @@ configure terminal
         network 10.0.1.0 0.0.0.3 area 0
         network 10.0.1.4 0.0.0.3 area 0
         network 10.0.1.8 0.0.0.3 area 0
+        default-information originate metric 100 metric-type 1
     end
 write
 show ip interface brief
@@ -141,6 +170,15 @@ configure terminal
     interface range FastEthernet 1/0, FastEthernet 2/0, FastEthernet 3/0
         duplex full
     exit
+
+    ip sla 1
+        icmp-echo 203.0.113.5 source-interface fa0/0
+        frequency 5
+    ip sla schedule 1 life forever start-time now
+    track 1 ip sla 1 reachability
+    ip route 203.0.113.5 255.255.255.255 10.0.0.5
+    ip route 0.0.0.0 0.0.0.0 10.0.0.5 track 1
+
     router ospf 1
         router-id 1.1.1.2
         network 1.1.1.2 0.0.0.0 area 0
@@ -149,6 +187,7 @@ configure terminal
         network 10.0.1.12 0.0.0.3 area 0
         network 10.0.1.16 0.0.0.3 area 0
         network 10.0.1.20 0.0.0.3 area 0
+        default-information originate metric 10 metric-type 1
     end
 write
 show ip interface brief
@@ -388,6 +427,10 @@ IPS/IDS (ASAv)
 enable
 configure terminal
     hostname ASAv
+
+    same-security-traffic permit inter-interface
+    same-security-traffic permit intra-interface
+
     interface GigabitEthernet0/0
         description Connection to DIST-R1
         nameif outside-dist1
@@ -409,39 +452,49 @@ configure terminal
         ip address 10.0.1.34 255.255.255.252
         ospf network point-to-point non-broadcast
         no shutdown
-    interface range GigabitEthernet0/3
+    interface GigabitEthernet0/3
+        description Trunk to Linux Firewall
+        no ip address
         no shutdown
-    interface range GigabitEthernet0/4
-        no shutdown
-    interface Redundant1
-        member-interface GigabitEthernet0/3
-        member-interface GigabitEthernet0/4
-        no shutdown
-    interface Redundant1.10
+    interface GigabitEthernet0/3.10
         vlan 10
         nameif inside-users
         security-level 100
         ip address 192.168.10.1 255.255.255.0
         no shutdown
-    interface Redundant1.20
+    interface GigabitEthernet0/3.20
         vlan 20
         nameif DMZ-servers
         security-level 50
         ip address 192.168.20.1 255.255.255.0
         no shutdown
-    interface Redundant1.30
+    interface GigabitEthernet0/3.30
         vlan 30
         nameif inside-wifi
         security-level 70
         ip address 192.168.30.1 255.255.255.0
         no shutdown
-    interface Redundant1.99
+    interface GigabitEthernet0/3.99
         vlan 99
         nameif management
         security-level 90
         ip address 192.168.99.1 255.255.255.0
         no shutdown
-    exit
+
+    object network OBJ_INTERNAL_LANS
+    s   ubnet 192.168.0.0 255.255.0.0
+    nat (management,outside-dist1) source dynamic OBJ_INTERNAL_LANS interface
+    nat (management,outside-dist2) source dynamic OBJ_INTERNAL_LANS interface
+    nat (management,outside-dist3) source dynamic OBJ_INTERNAL_LANS interface
+    nat (inside-users,outside-dist1) source dynamic OBJ_INTERNAL_LANS interface
+    nat (inside-users,outside-dist2) source dynamic OBJ_INTERNAL_LANS interface
+    nat (inside-users,outside-dist3) source dynamic OBJ_INTERNAL_LANS interface
+
+    policy-map global_policy
+        class inspection_default
+        inspect icmp
+    service-policy global_policy global
+
     router ospf 1
         router-id 4.4.4.4
         log-adj-changes
@@ -465,8 +518,6 @@ sudo nano /etc/netplan/netcfg.yaml
     version: 2
     renderer: networkd
     ethernets:
-        eth0:
-        dhcp4: no
         eth1:
         dhcp4: no
         eth2:
@@ -477,8 +528,11 @@ sudo nano /etc/netplan/netcfg.yaml
         dhcp4: no
     bridges:
         br0:
-        interfaces: [eth0, eth1, eth2, eth3, eth4]
+        interfaces: [eth1, eth2, eth3, eth4]
         dhcp4: no
+        parameters:
+            stp: false
+            forward-delay: 0
     vlans:
         br0.99:
         id: 99

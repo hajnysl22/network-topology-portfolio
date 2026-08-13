@@ -482,7 +482,7 @@ configure terminal
         no shutdown
 
     object network OBJ_INTERNAL_LANS
-    s   ubnet 192.168.0.0 255.255.0.0
+    subnet 192.168.0.0 255.255.0.0
     nat (management,outside-dist1) source dynamic OBJ_INTERNAL_LANS interface
     nat (management,outside-dist2) source dynamic OBJ_INTERNAL_LANS interface
     nat (management,outside-dist3) source dynamic OBJ_INTERNAL_LANS interface
@@ -513,35 +513,69 @@ write memory
 
 Firewall (Linux - ubuntu 20.04 root root)
 sudo nano /etc/netplan/netcfg.yaml 
-    {
-    network:
-    version: 2
-    renderer: networkd
-    ethernets:
-        eth1:
-        dhcp4: no
-        eth2:
-        dhcp4: no
-        eth3:
-        dhcp4: no
-        eth4:
-        dhcp4: no
-    bridges:
-        br0:
-        interfaces: [eth1, eth2, eth3, eth4]
-        dhcp4: no
-        parameters:
-            stp: false
-            forward-delay: 0
-    vlans:
-        br0.99:
-        id: 99
-        link: br0
-        addresses:
-            - 192.168.99.5/24
-        routes:
-            - to: default
-            via: 192.168.99.1
-    }
+{
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    eth0:
+      dhcp4: no
+    eth1:
+      dhcp4: no
+    eth2:
+      dhcp4: no
+    eth3:
+      dhcp4: no
+    eth4:
+      dhcp4: no
+  bridges:
+    br0:
+      interfaces: [eth2, eth3, eth4]
+      dhcp4: no
+      parameters:
+        stp: false
+        forward-delay: 0
+  vlans:
+    eth1.99
+      id: 99
+      link: eth1
+      dhcp4: no
+      addresses:
+        - 192.168.99.5/24
+      routes:
+        - to: default
+          via: 192.168.99.1
 
+    # Internal Gateways (on br0 / canvas e2-e4)
+    vlan10:
+      id: 10
+      link: br0
+      dhcp4: no
+      addresses:
+        - 192.168.10.1/24
+
+    vlan20:
+      id: 20
+      link: br0
+      dhcp4: no
+      addresses:
+        - 192.168.20.1/24
+
+    vlan30:
+      id: 30
+      link: br0
+      dhcp4: no
+      addresses:
+        - 192.168.30.1/24
+
+    vlan99:
+      id: 99
+      link: br0
+      dhcp4: no
+      addresses:
+       - 192.168.99.254/24
+}
+echo "net.ipv4.ip_forward=1" | sudo tee -a /etc/sysctl.d/99-ipforward.conf
 sudo netplan apply
+sudo iptables -t nat -A POSTROUTING -o eth1.99 -j MASQUERADE
+ip -br link

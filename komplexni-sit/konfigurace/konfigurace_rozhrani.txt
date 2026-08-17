@@ -572,6 +572,15 @@ network:
           via: 192.168.20.1
 }
 sudo netplan apply
+sudo apt install isc-dhcp-server
+
+sudo apt install bind9
+
+sudo apt install chrony
+
+sudo apt install freeradius
+
+sudo apt install openssl
 
 SRV2
 sudo nano /etc/netplan/01-netcfg.yaml 
@@ -589,6 +598,19 @@ network:
           via: 192.168.20.1
 }
 sudo netplan apply
+sudo apt install isc-dhcp-server
+
+sudo apt install bind9
+
+sudo apt install chrony
+
+sudo apt install rsyslog
+
+sudo apt install snmpd
+
+sudo apt install tftpd-hpa
+
+sudo apt install apache2
 
 WiFi-AP
 sudo nano /etc/netplan/01-netcfg.yaml 
@@ -606,5 +628,3 @@ network:
           via: 192.168.30.1
 }
 sudo netplan apply
-
-services: dhcp, dns, ntp, aaa, local ca, www, syslong, snmp

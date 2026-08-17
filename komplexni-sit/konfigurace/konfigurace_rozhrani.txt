@@ -456,39 +456,18 @@ configure terminal
         description Trunk to Linux Firewall
         no ip address
         no shutdown
-    interface GigabitEthernet0/3.10
-        vlan 10
-        nameif inside-users
-        security-level 100
-        ip address 192.168.10.1 255.255.255.0
-        no shutdown
-    interface GigabitEthernet0/3.20
-        vlan 20
-        nameif DMZ-servers
-        security-level 50
-        ip address 192.168.20.1 255.255.255.0
-        no shutdown
-    interface GigabitEthernet0/3.30
-        vlan 30
-        nameif inside-wifi
-        security-level 70
-        ip address 192.168.30.1 255.255.255.0
-        no shutdown
     interface GigabitEthernet0/3.99
         vlan 99
         nameif management
         security-level 90
-        ip address 192.168.99.1 255.255.255.0
+        ip address 10.99.99.1 255.255.255.0
         no shutdown
 
     object network OBJ_INTERNAL_LANS
-    subnet 192.168.0.0 255.255.0.0
-    nat (management,outside-dist1) source dynamic OBJ_INTERNAL_LANS interface
-    nat (management,outside-dist2) source dynamic OBJ_INTERNAL_LANS interface
-    nat (management,outside-dist3) source dynamic OBJ_INTERNAL_LANS interface
-    nat (inside-users,outside-dist1) source dynamic OBJ_INTERNAL_LANS interface
-    nat (inside-users,outside-dist2) source dynamic OBJ_INTERNAL_LANS interface
-    nat (inside-users,outside-dist3) source dynamic OBJ_INTERNAL_LANS interface
+        subnet 192.168.0.0 255.255.0.0
+        nat (management,outside-dist1) source dynamic OBJ_INTERNAL_LANS interface
+        nat (management,outside-dist2) source dynamic OBJ_INTERNAL_LANS interface
+        nat (management,outside-dist3) source dynamic OBJ_INTERNAL_LANS interface
 
     policy-map global_policy
         class inspection_default
@@ -504,11 +483,9 @@ configure terminal
         neighbor 10.0.1.29 interface outside-dist2
         network 10.0.1.32 255.255.255.252 area 0
         neighbor 10.0.1.33 interface outside-dist3
-        network 192.168.10.0 255.255.255.0 area 0
-        network 192.168.20.0 255.255.255.0 area 0
-        network 192.168.30.0 255.255.255.0 area 0
-        network 192.168.99.0 255.255.255.0 area 0
+        network 10.99.99.0 255.255.255.0 area 0
     end
+    route management 192.168.0.0 255.255.0.0 10.99.99.5
 write memory
 
 Firewall (Linux - ubuntu 20.04 root root)
@@ -522,6 +499,11 @@ network:
       dhcp4: no
     eth1:
       dhcp4: no
+      addresses:
+       - 10.99.99.5/24
+      routes:
+       - to: 0.0.0.0/0
+         via: 10.99.99.1
     eth2:
       dhcp4: no
     eth3:
@@ -536,17 +518,6 @@ network:
         stp: false
         forward-delay: 0
   vlans:
-    eth1.99
-      id: 99
-      link: eth1
-      dhcp4: no
-      addresses:
-        - 192.168.99.5/24
-      routes:
-        - to: 0.0.0.0/0
-          via: 192.168.99.1
-
-    # Internal Gateways (on br0 / canvas e2-e4)
     vlan10:
       id: 10
       link: br0
@@ -573,11 +544,16 @@ network:
       link: br0
       dhcp4: no
       addresses:
-       - 192.168.99.254/24
+       - 192.168.99.1/24
 }
-echo "net.ipv4.ip_forward=1" | sudo tee -a /etc/sysctl.d/99-ipforward.conf
+sudo nano /etc/sysctl.conf 
+    net.ipv4.ip_forward=1
 sudo netplan apply
-sudo iptables -t nat -A POSTROUTING -o eth1.99 -j MASQUERADE
+sudo apt-get install -y iptables-persistent netfilter-persistent
+sudo iptables -A FORWARD -i vlan+ -o eth1.99 -j ACCEPT
+sudo iptables -A FORWARD -i eth1.99 -o vlan+ -m state --state ESTABLISHED,RELATED -j ACCEPT
+sudo netfilter-persistent save
+cat /proc/sys/net/ipv4/ip_forward
 ip -br link
 
 SRV1
@@ -630,3 +606,5 @@ network:
           via: 192.168.30.1
 }
 sudo netplan apply
+
+services: dhcp, dns, ntp, aaa, local ca, www, syslong, snmp

@@ -454,14 +454,11 @@ configure terminal
         no shutdown
     interface GigabitEthernet0/3
         description Trunk to Linux Firewall
-        no ip address
-        no shutdown
-    interface GigabitEthernet0/3.99
-        vlan 99
         nameif management
         security-level 90
         ip address 10.99.99.1 255.255.255.0
         no shutdown
+        exit 
 
     object network OBJ_INTERNAL_LANS
         subnet 192.168.0.0 255.255.0.0

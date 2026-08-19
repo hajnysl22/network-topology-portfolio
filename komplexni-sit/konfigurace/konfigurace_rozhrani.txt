@@ -56,6 +56,7 @@ show interfaces description
 EDGE-R2
 enable
 configure terminal
+    hostname EDGE-R2
     interface fa0/0
         description Connection to ISP-2
         ip address 203.0.113.6 255.255.255.252
@@ -123,8 +124,8 @@ configure terminal
     ip route 0.0.0.0 0.0.0.0 10.0.0.1 200
 
     router ospf 1
-        router-id 1.1.1.1
-        network 1.1.1.1 0.0.0.0 area 0
+        router-id 2.2.2.1
+        network 2.2.2.1 0.0.0.0 area 0
         network 10.0.0.0 0.0.0.3 area 0
         network 10.0.0.8 0.0.0.3 area 0
         network 10.0.1.0 0.0.0.3 area 0
@@ -180,8 +181,8 @@ configure terminal
     ip route 0.0.0.0 0.0.0.0 10.0.0.5 track 1
 
     router ospf 1
-        router-id 1.1.1.2
-        network 1.1.1.2 0.0.0.0 area 0
+        router-id 2.2.2.2
+        network 2.2.2.2 0.0.0.0 area 0
         network 10.0.0.4 0.0.0.3 area 0
         network 10.0.0.8 0.0.0.3 area 0
         network 10.0.1.12 0.0.0.3 area 0
@@ -426,6 +427,7 @@ write
 
 # !!!!! FOR SOME UNKNOWN REASON OSPF FOR ASAV SET DEFAULT ROUTE TO DIST-R2 THAT DOESNT WORK AND DEAD INTERVAL DOESNT SEEM TO WORK BECAUSE DIST-R2 IS
 # !!!!! CONSIDERED UP FOR SOME REASON I AM LOSING MY MIND AND DONT KNOW IF I CAN PUT UP WITH THE TROUBLES EVENG BRINGS TO ME... 
+# !!!!! POSTPONED THE ISSUE BY SHUTTING DOWN interface GigabitEthernet 0/1 on ASAv
 
 IPS/IDS (ASAv)
 enable
@@ -448,7 +450,7 @@ configure terminal
         security-level 0
         ip address 10.0.1.30 255.255.255.252
         ospf network point-to-point non-broadcast
-        no shutdown
+        shutdown
     interface GigabitEthernet0/2
         description Connection to DIST-R3
         nameif outside-dist3
@@ -464,11 +466,19 @@ configure terminal
         no shutdown
         exit 
 
-    object network OBJ_INTERNAL_LANS
+    object network OBJ_INTERNAL_NETS
         subnet 192.168.0.0 255.255.0.0
-        nat (management,outside-dist1) source dynamic OBJ_INTERNAL_LANS interface
-        nat (management,outside-dist2) source dynamic OBJ_INTERNAL_LANS interface
-        nat (management,outside-dist3) source dynamic OBJ_INTERNAL_LANS interface
+        exit
+    object network OBJ_TRANSIT_NET
+        subnet 10.99.99.0 255.255.255.0
+        exit
+    object-group network OG_INSIDE_TRAFFIC
+        network-object object OBJ_INTERNAL_NETS
+        network-object object OBJ_TRANSIT_NET
+        exit
+    nat (management,outside-dist1) source dynamic OG_INSIDE_TRAFFIC interface
+    nat (management,outside-dist2) source dynamic OG_INSIDE_TRAFFIC interface
+    nat (management,outside-dist3) source dynamic OG_INSIDE_TRAFFIC interface
 
     policy-map global_policy
         class inspection_default

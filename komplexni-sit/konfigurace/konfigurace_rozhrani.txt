@@ -423,6 +423,10 @@ configure terminal
     end
 write
 
+
+# !!!!! FOR SOME UNKNOWN REASON OSPF FOR ASAV SET DEFAULT ROUTE TO DIST-R2 THAT DOESNT WORK AND DEAD INTERVAL DOESNT SEEM TO WORK BECAUSE DIST-R2 IS
+# !!!!! CONSIDERED UP FOR SOME REASON I AM LOSING MY MIND AND DONT KNOW IF I CAN PUT UP WITH THE TROUBLES EVENG BRINGS TO ME... 
+
 IPS/IDS (ASAv)
 enable
 configure terminal
@@ -547,8 +551,8 @@ sudo nano /etc/sysctl.conf
     net.ipv4.ip_forward=1
 sudo netplan apply
 sudo apt-get install -y iptables-persistent netfilter-persistent
-sudo iptables -A FORWARD -i vlan+ -o eth1.99 -j ACCEPT
-sudo iptables -A FORWARD -i eth1.99 -o vlan+ -m state --state ESTABLISHED,RELATED -j ACCEPT
+sudo iptables -A FORWARD -i vlan+ -o eth1 -j ACCEPT
+sudo iptables -A FORWARD -i eth1 -o vlan+ -m state --state ESTABLISHED,RELATED -j ACCEPT
 sudo netfilter-persistent save
 cat /proc/sys/net/ipv4/ip_forward
 ip -br link

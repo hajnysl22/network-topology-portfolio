@@ -581,13 +581,88 @@ network:
       routes:
         - to: 0.0.0.0/0
           via: 192.168.20.1
+      nameservers:
+       addresses: [8.8.8.8, 1.1.1.1]
 }
 sudo netplan apply
 sudo apt install isc-dhcp-server
 
 sudo apt install bind9
 
+    sudo nano /etc/bind/named.conf.options
+    options {
+        directory "/var/cache/bind";
+
+        // Allow queries from internal subnets
+        allow-query { 127.0.0.1; 192.168.0.0/16; 10.99.99.0/24; 10.0.0.0/8; };
+        recursion yes;
+
+        // Upstream forwarders for public internet resolution
+        forwarders {
+            8.8.8.8;
+            1.1.1.1;
+        };
+
+        dnssec-validation auto;
+        listen-on-v6 { any; };
+    };
+
+    sudo nano /etc/bind/named.conf.local
+    zone "lab.local" {
+        type master;
+        file "/etc/bind/db.lab.local";
+        allow-transfer { 192.168.20.20; }; // Allow transfer to SRV2
+    };
+
+    zone "20.168.192.in-addr.arpa" {
+        type master;
+        file "/etc/bind/db.192.168.20";
+        allow-transfer { 192.168.20.20; };
+    };
+
+    sudo nano /etc/bind/db.lab.
+    $TTL    604800
+    @       IN      SOA     srv1.lab.local. admin.lab.local. (
+                                1         ; Serial
+                            604800         ; Refresh
+                            86400         ; Retry
+                            2419200         ; Expire
+                            604800 )       ; Negative Cache TTL
+    ; Name Servers
+    @       IN      NS      srv1.lab.local.
+    @       IN      NS      srv2.lab.local.
+
+    ; Host Records
+    srv1    IN      A       192.168.20.10
+    srv2    IN      A       192.168.20.20
+    fw      IN      A       192.168.20.1
+    asav    IN      A       10.99.99.1
+    ap      IN      A       192.168.30.10
+
+    sudo nano /etc/bind/db.192.168.20
+    $TTL    604800
+    @       IN      SOA     srv1.lab.local. admin.lab.local. (
+                                1         ; Serial
+                            604800         ; Refresh
+                            86400         ; Retry
+                            2419200         ; Expire
+                            604800 )       ; Negative Cache TTL
+    ; Name Servers
+    @       IN      NS      srv1.lab.local.
+    @       IN      NS      srv2.lab.local.
+
+    ; PTR Records
+    1       IN      PTR     fw.lab.local.
+    10      IN      PTR     srv1.lab.local.
+    20      IN      PTR     srv2.lab.local.
+
 sudo apt install chrony
+
+    sudo nano /etc/chrony/chrony.conf
+    allow 192.168.0.0/16
+    allow 10.0.0.0/8
+    local stratum 10
+    sudo chronyc tracking
 
 sudo apt install freeradius
 
@@ -607,13 +682,50 @@ network:
       routes:
         - to: 0.0.0.0/0
           via: 192.168.20.1
+      nameservers:
+       addresses: [8.8.8.8, 1.1.1.1]
 }
 sudo netplan apply
 sudo apt install isc-dhcp-server
 
 sudo apt install bind9
 
+    sudo nano /etc/bind/named.conf.options
+    options {
+        directory "/var/cache/bind";
+
+        allow-query { 127.0.0.1; 192.168.0.0/16; 10.99.99.0/24; 10.0.0.0/8; };
+        recursion yes;
+
+        forwarders {
+            8.8.8.8;
+            1.1.1.1;
+        };
+
+        dnssec-validation auto;
+        listen-on-v6 { any; };
+    };
+
+    sudo nano /etc/bind/named.conf.local
+    zone "lab.local" {
+        type slave;
+        file "/var/cache/bind/db.lab.local";
+        masters { 192.168.20.10; };
+    };
+
+    zone "20.168.192.in-addr.arpa" {
+        type slave;
+        file "/var/cache/bind/db.192.168.20";
+        masters { 192.168.20.10; };
+    };
+
 sudo apt install chrony
+
+    sudo nano /etc/chrony/chrony.conf
+    server 192.168.20.10 iburst
+    allow 192.168.0.0/16
+    local stratum 10
+    sudo chronyc sources
 
 sudo apt install rsyslog
 

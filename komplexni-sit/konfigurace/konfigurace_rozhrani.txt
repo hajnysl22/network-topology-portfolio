@@ -48,7 +48,15 @@ configure terminal
     ip route 0.0.0.0 0.0.0.0 203.0.113.1
     ip route 10.0.0.0 255.0.0.0 10.0.0.2
     ip route 192.168.0.0 255.255.0.0 10.0.0.2
+
+    logging host 192.168.20.20
+    logging trap informational
+    logging source-interface Loopback0
+    snmp-server community labpublic RO
+    snmp-server host 192.168.20.20 version 2c labpublic
+
     end
+    copy running-config tftp://192.168.20.20/edge-r1.cfg
 write
 show ip interface brief
 show interfaces description
@@ -81,7 +89,13 @@ configure terminal
     ip route 10.0.0.0 255.0.0.0 10.0.0.6
     ip route 192.168.0.0 255.255.0.0 10.0.0.6
 
+    logging host 192.168.20.20
+    logging trap informational
+    logging source-interface Loopback0
+    snmp-server community labpublic RO
+    snmp-server host 192.168.20.20 version 2c labpublic
     end
+    copy running-config tftp://192.168.20.20/edge-r2.cfg
 write
 show ip interface brief
 show interfaces description
@@ -132,7 +146,16 @@ configure terminal
         network 10.0.1.4 0.0.0.3 area 0
         network 10.0.1.8 0.0.0.3 area 0
         default-information originate metric 100 metric-type 1
+    exit
+
+    logging host 192.168.20.20
+    logging trap informational
+    logging source-interface Loopback0
+    snmp-server community labpublic RO
+    snmp-server host 192.168.20.20 version 2c labpublic
     end
+
+    copy running-config tftp://192.168.20.20/core-r1.cfg
 write
 show ip interface brief
 show interfaces description
@@ -189,7 +212,16 @@ configure terminal
         network 10.0.1.16 0.0.0.3 area 0
         network 10.0.1.20 0.0.0.3 area 0
         default-information originate metric 10 metric-type 1
+    exit
+
+    logging host 192.168.20.20
+    logging trap informational
+    logging source-interface Loopback0
+    snmp-server community labpublic RO
+    snmp-server host 192.168.20.20 version 2c labpublic
     end
+
+    copy running-config tftp://192.168.20.20/core-r2.cfg
 write
 show ip interface brief
 show interfaces description
@@ -226,7 +258,16 @@ configure terminal
         network 10.0.1.0 0.0.0.3 area 0
         network 10.0.1.12 0.0.0.3 area 0
         network 10.0.1.24 0.0.0.3 area 0
+    exit
+
+    logging host 192.168.20.20
+    logging trap informational
+    logging source-interface Loopback0
+    snmp-server community labpublic RO
+    snmp-server host 192.168.20.20 version 2c labpublic
     end
+
+    copy running-config tftp://192.168.20.20/dist-r1.cfg
 write
 show ip interface brief
 show interfaces description
@@ -263,7 +304,8 @@ configure terminal
         network 10.0.1.4 0.0.0.3 area 0
         network 10.0.1.16 0.0.0.3 area 0
         network 10.0.1.28 0.0.0.3 area 0
-    end
+    exit
+
 write
 show ip interface brief
 show interfaces description
@@ -300,7 +342,16 @@ configure terminal
         network 10.0.1.8 0.0.0.3 area 0
         network 10.0.1.20 0.0.0.3 area 0
         network 10.0.1.32 0.0.0.3 area 0
+    exit
+
+    logging host 192.168.20.20
+    logging trap informational
+    logging source-interface Vlan99
+    snmp-server community labpublic RO
+    snmp-server host 192.168.20.20 version 2c labpublic
     end
+
+    copy running-config tftp://192.168.20.20/dist-r3.cfg
 write
 show ip interface brief
 show interfaces description
@@ -340,7 +391,25 @@ configure terminal
         switchport mode access
         switchport access vlan 999
         shutdown
+    interface Vlan99
+        description Management SVI
+        ip address 192.168.99.11 255.255.255.0
+        no shutdown
+    exit
+
+    ip route 0.0.0.0 0.0.0.0 192.168.99.1
+
+    ip default-gateway 192.168.99.1
+    ip tftp source-interface Vlan99
+
+    logging host 192.168.20.20
+    logging trap informational
+    logging source-interface Loopback0
+    snmp-server community labpublic RO
+    snmp-server host 192.168.20.20 version 2c labpublic
     end
+
+    copy running-config tftp://192.168.20.20/access-sw1.cfg
 write
 
 ACCESS-SW2
@@ -378,7 +447,25 @@ configure terminal
         switchport mode access
         switchport access vlan 20
         no shutdown
+    interface Vlan99
+        description Management SVI
+        ip address 192.168.99.12 255.255.255.0
+        no shutdown
+    exit
+
+    ip route 0.0.0.0 0.0.0.0 192.168.99.1
+
+    ip default-gateway 192.168.99.1
+    ip tftp source-interface Vlan99
+
+    logging host 192.168.20.20
+    logging trap informational
+    logging source-interface Vlan99
+    snmp-server community labpublic RO
+    snmp-server host 192.168.20.20 version 2c labpublic
     end
+
+    copy running-config tftp://192.168.20.20/access-sw2.cfg
 write
 
 ACCESS-SW3
@@ -421,18 +508,36 @@ configure terminal
         switchport mode access
         switchport access vlan 999
         shutdown
+    interface Vlan99
+        description Management SVI
+        ip address 192.168.99.13 255.255.255.0
+        no shutdown
+    exit
+
+    ip route 0.0.0.0 0.0.0.0 192.168.99.1
+
+    ip default-gateway 192.168.99.1
+    ip tftp source-interface Vlan99
+
+    logging host 192.168.20.20
+    logging trap informational
+    logging source-interface Vlan99
+    snmp-server community labpublic RO
+    snmp-server host 192.168.20.20 version 2c labpublic
     end
+
+    copy running-config tftp://192.168.20.20/access-sw3.cfg
 write
-
-
-# !!!!! FOR SOME UNKNOWN REASON OSPF FOR ASAV SET DEFAULT ROUTE TO DIST-R2 THAT DOESNT WORK AND DEAD INTERVAL DOESNT SEEM TO WORK BECAUSE DIST-R2 IS
-# !!!!! CONSIDERED UP FOR SOME REASON I AM LOSING MY MIND AND DONT KNOW IF I CAN PUT UP WITH THE TROUBLES EVENG BRINGS TO ME... 
-# !!!!! POSTPONED THE ISSUE BY SHUTTING DOWN interface GigabitEthernet 0/1 on ASAv
 
 IPS/IDS (ASAv)
 enable
 configure terminal
     hostname ASAv
+
+    logging enable
+    logging host management 192.168.20.20
+    logging trap informational
+    snmp-server host management 192.168.20.20 community labpublic
 
     same-security-traffic permit inter-interface
     same-security-traffic permit intra-interface
@@ -480,9 +585,18 @@ configure terminal
     nat (management,outside-dist2) source dynamic OG_INSIDE_TRAFFIC interface
     nat (management,outside-dist3) source dynamic OG_INSIDE_TRAFFIC interface
 
+    object-group network OG_INFRASTRUCTURE
+    network-object 10.0.0.0 255.0.0.0
+    network-object 1.1.1.0 255.255.255.0
+    exit
+    nat (management,outside-dist1) source static OBJ_INTERNAL_NETS OBJ_INTERNAL_NETS destination static OG_INFRASTRUCTURE OG_INFRASTRUCTURE no-proxy-arp
+    nat (management,outside-dist2) source static OBJ_INTERNAL_NETS OBJ_INTERNAL_NETS destination static OG_INFRASTRUCTURE OG_INFRASTRUCTURE no-proxy-arp
+    nat (management,outside-dist3) source static OBJ_INTERNAL_NETS OBJ_INTERNAL_NETS destination static OG_INFRASTRUCTURE OG_INFRASTRUCTURE no-proxy-arp
+
     policy-map global_policy
         class inspection_default
         inspect icmp
+        inspect tftp
     service-policy global_policy global
 
     router ospf 1
@@ -495,8 +609,19 @@ configure terminal
         network 10.0.1.32 255.255.255.252 area 0
         neighbor 10.0.1.33 interface outside-dist3
         network 10.99.99.0 255.255.255.0 area 0
-    end
+        redistribute static subnets
+    exit
     route management 192.168.0.0 255.255.0.0 10.99.99.5
+
+    access-list OUTSIDE_IN extended permit ip 10.0.0.0 255.0.0.0 192.168.20.0 255.255.255.0
+    access-list OUTSIDE_IN extended permit ip 1.1.1.0 255.255.255.0 192.168.20.0 255.255.255.0
+    access-list OUTSIDE_IN extended permit ip any 192.168.20.0 255.255.255.0
+    access-list OUTSIDE_IN extended permit icmp any any
+
+    access-group OUTSIDE_IN in interface outside-dist1
+    access-group OUTSIDE_IN in interface outside-dist2
+    access-group OUTSIDE_IN in interface outside-dist3
+
 write memory
 
 Firewall (Linux - ubuntu 20.04 root root)
@@ -563,6 +688,8 @@ sudo netplan apply
 sudo apt-get install -y iptables-persistent netfilter-persistent isc-dhcp-relay
 sudo iptables -A FORWARD -i vlan+ -o eth1 -j ACCEPT
 sudo iptables -A FORWARD -i eth1 -o vlan+ -m state --state ESTABLISHED,RELATED -j ACCEPT
+sudo iptables -I FORWARD 1 -i eth1 -o vlan20 -s 10.0.0.0/8 -d 192.168.20.0/24 -j ACCEPT
+sudo iptables -I FORWARD 1 -i vlan+ -o vlan+ -j ACCEPT
 sudo netfilter-persistent save
 cat /proc/sys/net/ipv4/ip_forward
 ip -br link
@@ -851,9 +978,51 @@ sudo apt install chrony
 
 sudo apt install rsyslog
 
+    sudo nano /etc/rsyslog.conf
+    module(load="imudp")
+    input(type="imudp" port="514")
+
+    sudo nano /etc/rsyslog.d/30-remote-network.
+    $template RemoteLogs,"/var/log/network/%HOSTNAME%/%PROGRAMNAME%.log"
+    *.* ?RemoteLogs
+    & stop
+
+    sudo mkdir -p /var/log/network
+    sudo chown -R syslog:adm /var/log/network
+    sudo systemctl restart rsyslog
+    sudo ss -ulnp | grep :514
+
 sudo apt install snmpd
 
+    sudo nano /etc/snmp/snmpd.conf
+    agentAddress udp:161
+
+    # System Information
+    sysLocation    "Lab Rack 1"
+    sysContact     admin@lab.local
+
+    rocommunity labpublic 192.168.0.0/16
+    rocommunity labpublic 10.0.0.0/8
+    rocommunity labpublic 127.0.0.1
+
+    sudo systemctl restart snmpd
+    sudo systemctl status snmpd --no-pager
+
+    snmpwalk -v2c -c labpublic 127.0.0.1 1.3.6.1.2.1.1.1
+
 sudo apt install tftpd-hpa
+
+    sudo nano /etc/default/tftpd-hpa
+    TFTP_USERNAME="tftp"
+    TFTP_DIRECTORY="/srv/tftp"
+    TFTP_ADDRESS=":69"
+    TFTP_OPTIONS="--secure --create"
+
+    sudo mkdir -p /srv/tftp
+    sudo chown -R tftp:tftp /srv/tftp
+    sudo chmod -R 777 /srv/tftp
+    sudo systemctl restart tftpd-hpa
+    sudo systemctl status tftpd-hpa --no-pager
 
 sudo apt install apache2
 

@@ -855,9 +855,51 @@ sudo apt install chrony
     local stratum 10
     sudo chronyc tracking
 
-sudo apt install freeradius
-
 sudo apt install openssl
+
+    sudo mkdir -p /etc/ssl/lab-ca/{certs,crl,newcerts,private}
+    sudo chmod 700 /etc/ssl/lab-ca/private
+    cd /etc/ssl/lab-ca
+
+    sudo openssl req -x509 -new -nodes -keyout private/ca.key -sha256 -days 3650 -out certs/ca.crt
+    -subj "/C=CZ/ST=Czechia/L=Lab/O=Lab Network/CN=Lab Root CA"
+
+    sudo openssl req -new -nodes -keyout /etc/ssl/private/web.key -out /etc/ssl/web.csr
+    -subj "/C=CZ/ST=Czechia/L=Lab/O=Lab Network/CN=srv1.lab.local"
+
+    nano /etc/ssl/web.ext
+    authorityKeyIdentifier=keyid,issuer
+    basicConstraints=CA:FALSE
+    keyUsage = digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment
+    subjectAltName = @alt_names
+
+    [alt_names]
+    DNS.1 = srv1.lab.local
+    DNS.2 = srv1
+    IP.1 = 192.168.20.10
+    EOF
+
+    sudo openssl x509 -req -in /etc/ssl/web.csr -CA certs/ca.crt -CAkey private/ca.key
+    -CAcreateserial -out /etc/ssl/certs/web.crt -days 825 -sha256 -extfile /etc/ssl/web.ext
+
+sudo apt install apache2
+    sudo a2enmod ssl headers rewrite
+    sudo nano /etc/apache2/sites-available/001-lab-ssl.conf
+    <VirtualHost *:443>
+        ServerName srv1.lab.local
+        ServerAdmin admin@lab.local
+        DocumentRoot /var/www/html
+
+        SSLEngine on
+        SSLCertificateFile /etc/ssl/certs/web.crt
+        SSLCertificateKeyFile /etc/ssl/private/web.key
+        SSLCACertificateFile /etc/ssl/lab-ca/certs/ca.crt
+
+        ErrorLog ${APACHE_LOG_DIR}/lab_error.log
+        CustomLog ${APACHE_LOG_DIR}/lab_access.log combined
+    VirtualHost>
+    sudo a2ensite 001-lab-ssl.conf
+    sudo systemctl restart apache2
 
 SRV2
 sudo nano /etc/netplan/01-netcfg.yaml 
@@ -1024,7 +1066,29 @@ sudo apt install tftpd-hpa
     sudo systemctl restart tftpd-hpa
     sudo systemctl status tftpd-hpa --no-pager
 
-sudo apt install apache2
+sudo apt install freeradius freeradius-utils
+
+    sudo nano /etc/freeradius/3.0/clients.conf
+    client lab_network {
+        ipaddr = 192.168.0.0/16
+        secret = RadiusKey123
+        nas_type = cisco
+    }
+
+    client lab_campus {
+        ipaddr = 10.0.0.0/8
+        secret = RadiusKey123
+        nas_type = cisco
+    }
+
+    sudo nano /etc/freeradius/3.0/users
+    admin   Cleartext-Password := "AdminSecurePass123"
+            Service-Type = Administrative-User,
+            Cisco-AVPair = "shell:priv-lvl=15"
+
+    sudo systemctl restart freeradius
+    sudo systemctl status freeradius --no-pager
+    radtest admin AdminSecurePass123 127.0.0.1 0 testing123
 
 WiFi-AP
 sudo nano /etc/netplan/01-netcfg.yaml 

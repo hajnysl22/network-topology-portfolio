@@ -620,7 +620,14 @@ configure terminal
     aaa authentication login default group RADIUS_GROUP local
     aaa authorization exec default group RADIUS_GROUP local
 
+    ip access-list standard ACL_ADMIN_ONLY
+        permit 192.168.99.0 0.0.0.255
+        permit 192.168.20.0 0.0.0.255
+        deny any log
+    exit
+
     line vty 0 15
+        access-class ACL_ADMIN_ONLY in
         transport input ssh
         login authentication default
         authorization exec default
@@ -705,7 +712,14 @@ configure terminal
     aaa authentication login default group RADIUS_GROUP local
     aaa authorization exec default group RADIUS_GROUP local
 
+    ip access-list standard ACL_ADMIN_ONLY
+        permit 192.168.99.0 0.0.0.255
+        permit 192.168.20.0 0.0.0.255
+        deny any log
+    exit
+
     line vty 0 15
+        access-class ACL_ADMIN_ONLY in
         transport input ssh
         login authentication default
         authorization exec default
@@ -795,7 +809,14 @@ configure terminal
     aaa authentication login default group RADIUS_GROUP local
     aaa authorization exec default group RADIUS_GROUP local
 
+    ip access-list standard ACL_ADMIN_ONLY
+        permit 192.168.99.0 0.0.0.255
+        permit 192.168.20.0 0.0.0.255
+        deny any log
+    exit
+
     line vty 0 15
+        access-class ACL_ADMIN_ONLY in
         transport input ssh
         login authentication default
         authorization exec default

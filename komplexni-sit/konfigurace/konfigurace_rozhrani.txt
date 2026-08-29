@@ -559,6 +559,8 @@ configure terminal
         name Unused ports
     exit
     hostname ACCESS-SW1
+    spanning-tree portfast default
+    spanning-tree portfast bpduguard default
     interface Gi0/0
         description Connection to IPS/IDS
         switchport trunk encapsulation dot1q
@@ -568,6 +570,12 @@ configure terminal
         description Connection to VLAN10
         switchport mode access
         switchport access vlan 10
+        switchport port-security
+        switchport port-security maximum 2
+        switchport port-security mac-address sticky
+        switchport port-security violation restrict
+        switchport port-security aging time 10
+        switchport port-security aging type inactivity
         no shutdown
     interface range Gi1/0 - 1
         description Connection to VLAN99
@@ -583,6 +591,15 @@ configure terminal
         description Management SVI
         ip address 192.168.99.11 255.255.255.0
         no shutdown
+    exit
+
+    interface range Gi1/0 - 3
+        switchport port-security
+        switchport port-security maximum 2
+        switchport port-security mac-address sticky
+        switchport port-security violation restrict
+        switchport port-security aging time 10
+        switchport port-security aging type inactivity
     exit
 
     ip route 0.0.0.0 0.0.0.0 192.168.99.1
@@ -651,6 +668,8 @@ configure terminal
         name Unused ports
     exit
     hostname ACCESS-SW2
+    spanning-tree portfast default
+    spanning-tree portfast bpduguard default
     interface Gi0/0
         description Connection to IPS/IDS
         switchport trunk encapsulation dot1q
@@ -660,6 +679,12 @@ configure terminal
         description Connection to VLAN10
         switchport mode access
         switchport access vlan 10
+        switchport port-security
+        switchport port-security maximum 2
+        switchport port-security mac-address sticky
+        switchport port-security violation restrict
+        switchport port-security aging time 10
+        switchport port-security aging type inactivity
         no shutdown
     interface range Gi1/0 - 1
         description Connection to VLAN99
@@ -675,6 +700,15 @@ configure terminal
         description Management SVI
         ip address 192.168.99.12 255.255.255.0
         no shutdown
+    exit
+
+    interface range Gi1/0 - 3
+        switchport port-security
+        switchport port-security maximum 2
+        switchport port-security mac-address sticky
+        switchport port-security violation restrict
+        switchport port-security aging time 10
+        switchport port-security aging type inactivity
     exit
 
     ip route 0.0.0.0 0.0.0.0 192.168.99.1
@@ -743,6 +777,8 @@ configure terminal
         name Unused ports
     exit
     hostname ACCESS-SW3
+    spanning-tree portfast default
+    spanning-tree portfast bpduguard default
     interface Gi0/0
         description Connection to IPS/IDS
         switchport trunk encapsulation dot1q
@@ -752,11 +788,23 @@ configure terminal
         description Connection to VLAN10
         switchport mode access
         switchport access vlan 10
+        switchport port-security
+        switchport port-security maximum 2
+        switchport port-security mac-address sticky
+        switchport port-security violation restrict
+        switchport port-security aging time 10
+        switchport port-security aging type inactivity
         no shutdown
     interface range Gi1/0 - 1
         description Connection to VLAN99
         switchport mode access
         switchport access vlan 99
+        switchport port-security
+        switchport port-security maximum 2
+        switchport port-security mac-address sticky
+        switchport port-security violation restrict
+        switchport port-security aging time 10
+        switchport port-security aging type inactivity
         no shutdown
     interface Gi1/2
         description Connection to VLAN30
@@ -769,6 +817,12 @@ configure terminal
         description Connection to VLAN999
         switchport mode access
         switchport access vlan 999
+        switchport port-security
+        switchport port-security maximum 2
+        switchport port-security mac-address sticky
+        switchport port-security violation restrict
+        switchport port-security aging time 10
+        switchport port-security aging type inactivity
         shutdown
     interface Vlan99
         description Management SVI

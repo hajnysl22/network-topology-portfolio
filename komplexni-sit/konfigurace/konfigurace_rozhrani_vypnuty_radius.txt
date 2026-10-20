@@ -776,6 +776,9 @@ ip domain-name lab.local
 crypto key generate rsa modulus 2048
 ip ssh version 2
 
+ip arp inspection vlan 10,20,30,99
+ip arp inspection validate src-mac dst-mac ip
+
 username admin privilege 15 secret AdminSecurePass123
 
 aaa new-model
@@ -830,6 +833,8 @@ exit
 
 interface GigabitEthernet0/1
  description Connection to VLAN10
+ ip arp inspection limit rate 15
+ spanning-tree bpduguard enable
  switchport mode access
  switchport access vlan 10
  switchport nonegotiate
@@ -844,6 +849,8 @@ exit
 
 interface GigabitEthernet1/0
  description Connection to VLAN99
+ ip arp inspection limit rate 15
+ spanning-tree bpduguard enable
  switchport mode access
  switchport access vlan 99
  switchport nonegotiate
@@ -914,6 +921,9 @@ ip domain-name lab.local
 crypto key generate rsa modulus 2048
 ip ssh version 2
 
+ip arp inspection vlan 10,20,30,99
+ip arp inspection validate src-mac dst-mac ip
+
 username admin privilege 15 secret AdminSecurePass123
 
 aaa new-model
@@ -969,6 +979,8 @@ exit
 
 interface GigabitEthernet0/1
  description Connection to VLAN10
+ ip arp inspection limit rate 15
+ spanning-tree bpduguard enable
  switchport mode access
  switchport access vlan 10
  switchport nonegotiate
@@ -983,6 +995,8 @@ exit
 
 interface GigabitEthernet1/0
  description Connection to VLAN99
+ ip arp inspection limit rate 15
+ spanning-tree bpduguard enable
  switchport mode access
  switchport access vlan 99
  switchport nonegotiate
@@ -997,6 +1011,8 @@ exit
 
 interface range GigabitEthernet1/2 - 3
  description Connection to VLAN20
+ ip arp inspection limit rate 100
+ spanning-tree bpduguard enable
  switchport mode access
  switchport access vlan 20
  switchport nonegotiate
@@ -1065,6 +1081,9 @@ ip domain-name lab.local
 crypto key generate rsa modulus 2048
 ip ssh version 2
 
+ip arp inspection vlan 10,20,30,99
+ip arp inspection validate src-mac dst-mac ip
+
 username admin privilege 15 secret AdminSecurePass123
 
 aaa new-model
@@ -1119,6 +1138,8 @@ exit
 
 interface GigabitEthernet0/1
  description Connection to VLAN10
+ ip arp inspection limit rate 15
+ spanning-tree bpduguard enable
  switchport mode access
  switchport access vlan 10
  switchport nonegotiate
@@ -1133,6 +1154,8 @@ exit
 
 interface GigabitEthernet1/0
  description Connection to VLAN99
+ ip arp inspection limit rate 15
+ spanning-tree bpduguard enable
  switchport mode access
  switchport access vlan 99
  switchport nonegotiate
@@ -1147,6 +1170,7 @@ exit
 
 interface GigabitEthernet1/2
  description Connection to WiFi AP (VLAN30,99)
+ ip arp inspection limit rate 50
  switchport trunk encapsulation dot1q
  switchport mode trunk
  switchport trunk allowed vlan 30,99

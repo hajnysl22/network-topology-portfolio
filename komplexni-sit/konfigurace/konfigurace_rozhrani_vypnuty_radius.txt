@@ -385,6 +385,13 @@ ip domain-name lab.local
 crypto key generate rsa modulus 2048
 ip ssh version 2
 
+no ip http server
+no ip http secure-server
+no ip source-route
+no ip finger
+no ip bootp server
+no service config
+
 username admin privilege 15 secret AdminSecurePass123
 
 aaa new-model
@@ -516,6 +523,13 @@ ip domain-name lab.local
 crypto key generate rsa modulus 2048
 ip ssh version 2
 
+no ip http server
+no ip http secure-server
+no ip source-route
+no ip finger
+no ip bootp server
+no service config
+
 username admin privilege 15 secret AdminSecurePass123
 
 aaa new-model
@@ -611,6 +625,13 @@ ip domain-name lab.local
 crypto key generate rsa modulus 2048
 ip ssh version 2
 
+no ip http server
+no ip http secure-server
+no ip source-route
+no ip finger
+no ip bootp server
+no service config
+
 username admin privilege 15 secret AdminSecurePass123
 
 aaa new-model
@@ -705,6 +726,13 @@ ip domain-name lab.local
 
 crypto key generate rsa modulus 2048
 ip ssh version 2
+
+no ip http server
+no ip http secure-server
+no ip source-route
+no ip finger
+no ip bootp server
+no service config
 
 username admin privilege 15 secret AdminSecurePass123
 

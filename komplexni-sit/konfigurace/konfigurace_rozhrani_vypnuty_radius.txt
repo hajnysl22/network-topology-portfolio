@@ -343,6 +343,28 @@ ip access-list standard ACL_ADMIN_MGMT
  deny any log
 exit
 
+ip access-list extended ACL_COPP_MGMT
+ permit tcp any any eq 22
+ permit ospf any any
+ permit icmp any any echo
+ permit icmp any any echo-reply
+exit
+
+class-map match-all CM_COPP_MGMT
+ match access-group name ACL_COPP_MGMT
+exit
+
+policy-map PM_COPP
+ class CM_COPP_MGMT
+  police 1000000 conform-action transmit exceed-action transmit
+ class class-default
+  police 256000 conform-action transmit exceed-action drop
+exit
+
+control-plane
+ service-policy input PM_COPP
+exit
+
 logging host 192.168.20.20
 logging trap informational
 logging source-interface Loopback0
@@ -481,6 +503,28 @@ router ospf 1
  area 0 authentication message-digest
 exit
 
+ip access-list extended ACL_COPP_MGMT
+ permit tcp any any eq 22
+ permit ospf any any
+ permit icmp any any echo
+ permit icmp any any echo-reply
+exit
+
+class-map match-all CM_COPP_MGMT
+ match access-group name ACL_COPP_MGMT
+exit
+
+policy-map PM_COPP
+ class CM_COPP_MGMT
+  police 1000000 conform-action transmit exceed-action transmit
+ class class-default
+  police 256000 conform-action transmit exceed-action drop
+exit
+
+control-plane
+ service-policy input PM_COPP
+exit
+
 logging host 192.168.20.20
 logging trap informational
 logging source-interface Loopback0
@@ -581,6 +625,28 @@ router ospf 1
  network 10.0.1.12 0.0.0.3 area 0
  network 10.0.1.24 0.0.0.3 area 0
  area 0 authentication message-digest
+exit
+
+ip access-list extended ACL_COPP_MGMT
+ permit tcp any any eq 22
+ permit ospf any any
+ permit icmp any any echo
+ permit icmp any any echo-reply
+exit
+
+class-map match-all CM_COPP_MGMT
+ match access-group name ACL_COPP_MGMT
+exit
+
+policy-map PM_COPP
+ class CM_COPP_MGMT
+  police 1000000 conform-action transmit exceed-action transmit
+ class class-default
+  police 256000 conform-action transmit exceed-action drop
+exit
+
+control-plane
+ service-policy input PM_COPP
 exit
 
 logging host 192.168.20.20
@@ -685,6 +751,28 @@ router ospf 1
  area 0 authentication message-digest
 exit
 
+ip access-list extended ACL_COPP_MGMT
+ permit tcp any any eq 22
+ permit ospf any any
+ permit icmp any any echo
+ permit icmp any any echo-reply
+exit
+
+class-map match-all CM_COPP_MGMT
+ match access-group name ACL_COPP_MGMT
+exit
+
+policy-map PM_COPP
+ class CM_COPP_MGMT
+  police 1000000 conform-action transmit exceed-action transmit
+ class class-default
+  police 256000 conform-action transmit exceed-action drop
+exit
+
+control-plane
+ service-policy input PM_COPP
+exit
+
 logging host 192.168.20.20
 logging trap informational
 logging source-interface Loopback0
@@ -785,6 +873,28 @@ router ospf 1
  network 10.0.1.20 0.0.0.3 area 0
  network 10.0.1.32 0.0.0.3 area 0
  area 0 authentication message-digest
+exit
+
+ip access-list extended ACL_COPP_MGMT
+ permit tcp any any eq 22
+ permit ospf any any
+ permit icmp any any echo
+ permit icmp any any echo-reply
+exit
+
+class-map match-all CM_COPP_MGMT
+ match access-group name ACL_COPP_MGMT
+exit
+
+policy-map PM_COPP
+ class CM_COPP_MGMT
+  police 1000000 conform-action transmit exceed-action transmit
+ class class-default
+  police 256000 conform-action transmit exceed-action drop
+exit
+
+control-plane
+ service-policy input PM_COPP
 exit
 
 logging host 192.168.20.20

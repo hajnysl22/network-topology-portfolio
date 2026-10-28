@@ -1,0 +1,16 @@
+ISP-2 (password Stanice1)
+system/identity/set name=ISP-2
+interface/ethernet/comment ether1 comment="Connection to EDGE-R2"
+interface/ethernet/comment ether2 comment="Connection to WAN"
+/ip address add address=203.0.113.5/30 interface=ether1
+/ip dhcp-client add interface=ether2 use-peer-dns=yes use-peer-ntp=yes add-default-route=yes disabled=no
+/ip firewall nat add chain=srcnat out-interface=ether2 action=masquerade comment="NAT to WAN"
+/ip dns set allow-remote-requests=yes
+/ip firewall filter
+add chain=input in-interface=ether1 protocol=udp dst-port=53 action=accept comment="Allow DNS from EDGE-R2"
+add chain=input in-interface=ether1 protocol=tcp dst-port=53 action=accept comment="Allow DNS from EDGE-R2"
+add chain=input in-interface=ether2 protocol=udp dst-port=53 action=drop comment="Drop WAN DNS"
+add chain=input in-interface=ether2 protocol=tcp dst-port=53 action=drop comment="Drop WAN DNS"
+/ip service disable telnet,ftp,www,api,api-ssl
+interface/ethernet/print
+ip add print

@@ -144,6 +144,7 @@ logging source-interface Loopback0
 
 snmp-server community MgtSecureRO_2026 RO ACL_ADMIN_MGMT
 snmp-server trap-source Loopback0
+snmp-server host 192.168.20.20 version 2c labpublic
 
 line con 0
  login local

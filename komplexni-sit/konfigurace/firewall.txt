@@ -1,0 +1,117 @@
+Firewall (Linux - ubuntu 20.04 root root)
+sudo nano /etc/netplan/netcfg.yaml 
+{
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    eth0:
+      dhcp4: no
+    eth1:
+      dhcp4: no
+      addresses:
+        - 10.99.99.5/24
+      routes:
+        - to: 0.0.0.0/0
+          via: 10.99.99.1
+    eth2:
+      dhcp4: no
+    eth3:
+      dhcp4: no
+    eth4:
+      dhcp4: no
+  bridges:
+    br0:
+      interfaces: [eth2, eth3, eth4]
+      dhcp4: no
+      parameters:
+        stp: true
+        forward-delay: 15
+  vlans:
+    vlan10:
+      id: 10
+      link: br0
+      dhcp4: no
+      addresses:
+        - 192.168.10.1/24
+    vlan20:
+      id: 20
+      link: br0
+      dhcp4: no
+      addresses:
+        - 192.168.20.1/24
+    vlan30:
+      id: 30
+      link: br0
+      dhcp4: no
+      addresses:
+        - 192.168.30.1/24
+    vlan99:
+      id: 99
+      link: br0
+      dhcp4: no
+      addresses:
+        - 192.168.99.1/24
+}
+sudo nano /etc/sysctl.conf 
+    net.ipv4.ip_forward=1
+sudo netplan apply
+sudo apt-get install -y iptables-persistent netfilter-persistent isc-dhcp-relay
+
+# Nastavení výchozích politik
+sudo iptables -P INPUT DROP
+sudo iptables -P FORWARD DROP
+sudo iptables -P OUTPUT ACCEPT
+
+# Povolení lokální smyčky a návratového provozu
+sudo iptables -A INPUT -i lo -j ACCEPT
+sudo iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+
+# DHCP dotazy od klientů na DHCP Relay démona
+sudo iptables -A INPUT -p udp --dport 67:68 -j ACCEPT
+
+# ICMP ping na brány pro diagnostiku
+sudo iptables -A INPUT -p icmp --icmp-type echo-request -j ACCEPT
+
+# SSH management povolen POUZE z VLAN 99
+sudo iptables -A INPUT -i vlan99 -p tcp --dport 22 -j ACCEPT
+
+# Stavové povolení návratových paketů
+sudo iptables -A FORWARD -m state --state ESTABLISHED,RELATED -j ACCEPT
+sudo iptables -A FORWARD -m state --state INVALID -j DROP
+
+
+# Odchozí provoz do WAN přes ASAv (eth1) ze všech VLAN
+sudo iptables -A FORWARD -i vlan+ -o eth1 -j ACCEPT
+
+# Povolení provozu z jádra sítě do serverové VLAN 20 (pro Syslog, RADIUS, SNMP, TFTP z routerů)
+sudo iptables -A FORWARD -i eth1 -o vlan20 -s 10.0.0.0/8 -d 192.168.20.0/24 -j ACCEPT
+sudo iptables -A FORWARD -i eth1 -o vlan20 -s 1.1.1.0/24 -d 192.168.20.0/24 -j ACCEPT
+sudo iptables -A FORWARD -i eth1 -o vlan20 -s 2.2.2.0/24 -d 192.168.20.0/24 -j ACCEPT
+sudo iptables -A FORWARD -i eth1 -o vlan20 -s 3.3.3.0/24 -d 192.168.20.0/24 -j ACCEPT
+
+# VLAN 99 (Management) má plný přístup do všech interních VLAN
+sudo iptables -A FORWARD -i vlan99 -o vlan+ -j ACCEPT
+
+# 4Klientské sítě (VLAN 10, VLAN 30) směrem k serverům (VLAN 20)
+# Povolení DNS (53), Web (80, 443) a ping na servery
+sudo iptables -A FORWARD -i vlan10 -o vlan20 -p udp --dport 53 -j ACCEPT
+sudo iptables -A FORWARD -i vlan10 -o vlan20 -p tcp --dport 53 -j ACCEPT
+sudo iptables -A FORWARD -i vlan10 -o vlan20 -p tcp -m multiport --dports 80,443 -j ACCEPT
+sudo iptables -A FORWARD -i vlan10 -o vlan20 -p icmp -j ACCEPT
+
+sudo iptables -A FORWARD -i vlan30 -o vlan20 -p udp --dport 53 -j ACCEPT
+sudo iptables -A FORWARD -i vlan30 -o vlan20 -p tcp --dport 53 -j ACCEPT
+sudo iptables -A FORWARD -i vlan30 -o vlan20 -p tcp -m multiport --dports 80,443 -j ACCEPT
+sudo iptables -A FORWARD -i vlan30 -o vlan20 -p icmp -j ACCEPT
+
+# Uložení pravidel
+sudo netfilter-persistent save
+
+cat /proc/sys/net/ipv4/ip_forward
+ip -br link
+
+sudo nano /etc/default/isc-dhcp-relay
+SERVERS="192.168.20.10 192.168.20.20"
+INTERFACES="vlan10 vlan20 vlan30 vlan99"
+OPTIONS=""

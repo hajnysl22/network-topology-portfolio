@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<lab name="PortfolioLab1" version="1" scripttimeout="300" lock="0" author="Lukáš Hajnyš">
+  <description>A network topology showcasing my skills learned from CCNA lectures.</description>
+  <topology>
+    <nodes>
+      <node id="8" name="ISP-1" type="qemu" template="mikrotik" image="mikrotik-7.2.1" console="telnet" cpu="1" cpulimit="0" ram="256" ethernet="4" uuid="5ce3a31e-6e72-4e7d-aed0-17d50b4ba82d" qemu_options="-machine type=pc-1.0,accel=kvm -serial mon:stdio -nographic -no-user-config -nodefaults -display none -vga std -rtc base=utc" qemu_version="2.4.0" qemu_arch="x86_64" qemu_nic="e1000-82545em" delay="0" icon="Router-2D-Gen-White-S.svg" config="0" left="69" top="9">
+        <interface id="0" name="eth1" type="ethernet" network_id="1"/>
+        <interface id="1" name="eth2" type="ethernet" network_id="29"/>
+      </node>
+      <node id="9" name="ISP-2" type="qemu" template="mikrotik" image="mikrotik-7.2.1" console="telnet" cpu="1" cpulimit="0" ram="256" ethernet="4" uuid="e379f1dd-a54f-4370-a282-d422824b2346" qemu_options="-machine type=pc-1.0,accel=kvm -serial mon:stdio -nographic -no-user-config -nodefaults -display none -vga std -rtc base=utc" qemu_version="2.4.0" qemu_arch="x86_64" qemu_nic="e1000-82545em" delay="0" icon="Router-2D-Gen-White-S.svg" config="0" left="618" top="12">
+        <interface id="0" name="eth1" type="ethernet" network_id="2"/>
+        <interface id="1" name="eth2" type="ethernet" network_id="29"/>
+      </node>
+      <node id="10" name="ASAv" type="qemu" template="asav" image="asav-992-100" console="telnet" cpu="2" cpulimit="0" ram="4096" ethernet="8" uuid="538cc516-7795-42fb-953d-d0f2255c1741" qemu_options="-machine type=pc-1.0,accel=kvm -serial mon:stdio -nographic -no-user-config -nodefaults -display none -vga std -rtc base=utc" qemu_version="2.4.0" qemu_arch="x86_64" delay="0" icon="Firewall-2D-ASA-S.svg" config="0" left="318" top="516">
+        <interface id="1" name="Gi0/0" type="ethernet" network_id="10"/>
+        <interface id="2" name="Gi0/1" type="ethernet" network_id="17"/>
+        <interface id="3" name="Gi0/2" type="ethernet" network_id="26"/>
+        <interface id="4" name="Gi0/3" type="ethernet" network_id="12"/>
+      </node>
+      <node id="11" name="Linux" type="qemu" template="linux" image="linux-ubuntu-server-20.04" console="vnc" cpu="2" cpulimit="0" ram="4096" ethernet="5" uuid="c030101d-4613-4853-a73a-e4d94f94f2cf" firstmac="00:50:00:00:0b:00" qemu_options="-machine type=pc,accel=kvm -vga std -usbdevice tablet -boot order=cd -cpu host" qemu_version="2.4.0" qemu_arch="x86_64" qemu_nic="virtio-net-pci" delay="0" icon="Server-2D-Linux-S.svg" config="0" left="327" top="624">
+        <interface id="1" name="e1" type="ethernet" network_id="12"/>
+        <interface id="2" name="e2" type="ethernet" network_id="14"/>
+        <interface id="3" name="e3" type="ethernet" network_id="15"/>
+        <interface id="4" name="e4" type="ethernet" network_id="19"/>
+      </node>
+      <node id="12" name="ACCESS-SW1" type="qemu" template="viosl2" image="viosl2-adventerprisek9-m.SSA.high_iron_20180619" console="telnet" cpu="1" cpulimit="0" ram="1024" ethernet="8" uuid="5bb796a4-f454-43fc-b6d1-051678b64031" qemu_options="-machine type=pc,accel=kvm -serial mon:stdio -nographic -no-user-config -nodefaults -rtc base=utc -cpu host" qemu_version="2.4.0" qemu_arch="x86_64" delay="0" icon="Switch-2D-L3-Generic-S.svg" config="0" left="102" top="663">
+        <interface id="0" name="Gi0/0" type="ethernet" network_id="14"/>
+        <interface id="1" name="Gi0/1" type="ethernet" network_id="20"/>
+        <interface id="4" name="Gi1/0" type="ethernet" network_id="21"/>
+      </node>
+      <node id="13" name="ACCESS-SW2" type="qemu" template="viosl2" image="viosl2-adventerprisek9-m.SSA.high_iron_20180619" console="telnet" cpu="1" cpulimit="0" ram="1024" ethernet="8" uuid="b98cc836-c626-4e43-8912-73e470d84202" qemu_options="-machine type=pc,accel=kvm -serial mon:stdio -nographic -no-user-config -nodefaults -rtc base=utc -cpu host" qemu_version="2.4.0" qemu_arch="x86_64" delay="0" icon="Switch-2D-L3-Generic-S.svg" config="0" left="306" top="741">
+        <interface id="0" name="Gi0/0" type="ethernet" network_id="15"/>
+        <interface id="1" name="Gi0/1" type="ethernet" network_id="22"/>
+        <interface id="4" name="Gi1/0" type="ethernet" network_id="25"/>
+        <interface id="6" name="Gi1/2" type="ethernet" network_id="23"/>
+        <interface id="7" name="Gi1/3" type="ethernet" network_id="24"/>
+      </node>
+      <node id="14" name="ACCESS-SW3" type="qemu" template="viosl2" image="viosl2-adventerprisek9-m.SSA.high_iron_20180619" console="telnet" cpu="1" cpulimit="0" ram="1024" ethernet="8" uuid="ccbb499f-b590-467c-ae6a-56a3f045f8f9" qemu_options="-machine type=pc,accel=kvm -serial mon:stdio -nographic -no-user-config -nodefaults -rtc base=utc -cpu host" qemu_version="2.4.0" qemu_arch="x86_64" delay="0" icon="Switch-2D-L3-Generic-S.svg" config="0" left="507" top="663">
+        <interface id="0" name="Gi0/0" type="ethernet" network_id="19"/>
+        <interface id="1" name="Gi0/1" type="ethernet" network_id="13"/>
+        <interface id="4" name="Gi1/0" type="ethernet" network_id="27"/>
+        <interface id="6" name="Gi1/2" type="ethernet" network_id="16"/>
+      </node>
+      <node id="15" name="PC1" type="vpcs" template="vpcs" image="" ethernet="1" delay="0" icon="PC-2D-Desktop-Generic-S.svg" config="0" left="24" top="768">
+        <interface id="0" name="eth0" type="ethernet" network_id="20"/>
+      </node>
+      <node id="16" name="PC2" type="vpcs" template="vpcs" image="" ethernet="1" delay="0" icon="PC-2D-Desktop-Generic-S.svg" config="0" left="523" top="770">
+        <interface id="0" name="eth0" type="ethernet" network_id="13"/>
+      </node>
+      <node id="17" name="PC3" type="vpcs" template="vpcs" image="" ethernet="1" delay="0" icon="PC-2D-Desktop-Generic-S.svg" config="0" left="222" top="819">
+        <interface id="0" name="eth0" type="ethernet" network_id="22"/>
+      </node>
+      <node id="18" name="SRV2" type="qemu" template="linux" image="linux-ubuntu-server-20.04" console="vnc" cpu="2" cpulimit="0" ram="4096" ethernet="1" uuid="96bb28b1-52c7-414a-badb-0c461afbc7bf" firstmac="00:50:00:00:12:00" qemu_options="-machine type=pc,accel=kvm -vga std -usbdevice tablet -boot order=cd -cpu host" qemu_version="2.4.0" qemu_arch="x86_64" qemu_nic="virtio-net-pci" delay="0" icon="Server-2D-Linux-S.svg" config="0" left="327" top="960">
+        <interface id="0" name="e0" type="ethernet" network_id="24"/>
+      </node>
+      <node id="20" name="SRV1" type="qemu" template="linux" image="linux-ubuntu-server-20.04" console="vnc" cpu="2" cpulimit="0" ram="4096" ethernet="1" uuid="5e11aa04-f262-41b0-8a41-e6e7cca20e9f" firstmac="00:50:00:00:14:00" qemu_options="-machine type=pc,accel=kvm -vga std -usbdevice tablet -boot order=cd -cpu host" qemu_version="2.4.0" qemu_arch="x86_64" qemu_nic="virtio-net-pci" delay="0" icon="Server-2D-Linux-S.svg" config="0" left="228" top="960">
+        <interface id="0" name="e0" type="ethernet" network_id="23"/>
+      </node>
+      <node id="21" name="MNGT-2" type="vpcs" template="vpcs" image="" ethernet="1" delay="0" icon="PC-2D-Desktop-Generic-S.svg" config="0" left="663" top="747">
+        <interface id="0" name="eth0" type="ethernet" network_id="27"/>
+      </node>
+      <node id="22" name="MNGT-1" type="vpcs" template="vpcs" image="" ethernet="1" delay="0" icon="PC-2D-Desktop-Generic-S.svg" config="0" left="120" top="777">
+        <interface id="0" name="eth0" type="ethernet" network_id="21"/>
+      </node>
+      <node id="23" name="NTBK" type="vpcs" template="vpcs" image="" ethernet="1" delay="0" icon="PC-2D-Desktop-Generic-S.svg" config="0" left="873" top="670">
+        <interface id="0" name="eth0" type="ethernet" network_id="28"/>
+      </node>
+      <node id="24" name="MNGT-3" type="vpcs" template="vpcs" image="" ethernet="1" delay="0" icon="PC-2D-Desktop-Generic-S.svg" config="0" left="420" top="870">
+        <interface id="0" name="eth0" type="ethernet" network_id="25"/>
+      </node>
+      <node id="25" name="WiFi-AP" type="qemu" template="linux" image="linux-ubuntu-server-20.04" console="vnc" cpu="2" cpulimit="0" ram="4096" ethernet="2" uuid="70dd04e3-470a-4477-a401-0d4a1edcf315" firstmac="00:50:00:00:19:00" qemu_options="-machine type=pc,accel=kvm -vga std -usbdevice tablet -boot order=cd -cpu host" qemu_version="2.4.0" qemu_arch="x86_64" qemu_nic="virtio-net-pci" delay="0" icon="Server-2D-Linux-S.svg" config="0" left="720" top="661">
+        <interface id="0" name="e0" type="ethernet" network_id="16"/>
+        <interface id="1" name="e1" type="ethernet" network_id="28"/>
+      </node>
+      <node id="19" name="EDGE-R1" type="dynamips" template="c7200" image="c7200-adventerprisek9-mz.152-4.S6.image" idlepc="0x62f21000" nvram="128" ram="256" console="" delay="0" icon="Router-2D-Gen-White-S.svg" config="0" left="69" top="120">
+        <slot id="1" module="PA-FE-TX"/>
+        <interface id="0" name="fa0/0" type="ethernet" network_id="1"/>
+        <interface id="16" name="fa1/0" type="ethernet" network_id="3"/>
+      </node>
+      <node id="27" name="CORE-R1" type="dynamips" template="c7200" image="c7200-adventerprisek9-mz.152-4.S6.image" idlepc="0x62f21000" nvram="128" ram="256" console="" delay="0" icon="Router-2D-Gen-White-S.svg" config="0" left="171" top="222">
+        <slot id="1" module="PA-FE-TX"/>
+        <slot id="2" module="PA-FE-TX"/>
+        <slot id="3" module="PA-FE-TX"/>
+        <slot id="4" module="PA-FE-TX"/>
+        <interface id="0" name="fa0/0" type="ethernet" network_id="3"/>
+        <interface id="16" name="fa1/0" type="ethernet" network_id="5"/>
+        <interface id="32" name="fa2/0" type="ethernet" network_id="6"/>
+        <interface id="48" name="fa3/0" type="ethernet" network_id="18"/>
+        <interface id="64" name="fa4/0" type="ethernet" network_id="7"/>
+      </node>
+      <node id="2" name="EDGE-R2" type="dynamips" template="c7200" image="c7200-adventerprisek9-mz.152-4.S6.image" idlepc="0x62f21000" nvram="128" ram="256" console="" delay="0" icon="Router-2D-Gen-White-S.svg" config="0" left="615" top="135">
+        <slot id="1" module="PA-FE-TX"/>
+        <interface id="0" name="fa0/0" type="ethernet" network_id="2"/>
+        <interface id="16" name="fa1/0" type="ethernet" network_id="4"/>
+      </node>
+      <node id="4" name="CORE-R2" type="dynamips" template="c7200" image="c7200-adventerprisek9-mz.152-4.S6.image" idlepc="0x62f21000" nvram="128" ram="256" console="" delay="0" icon="Router-2D-Gen-White-S.svg" config="0" left="474" top="225">
+        <slot id="1" module="PA-FE-TX"/>
+        <slot id="2" module="PA-FE-TX"/>
+        <slot id="3" module="PA-FE-TX"/>
+        <slot id="4" module="PA-FE-TX"/>
+        <interface id="0" name="fa0/0" type="ethernet" network_id="4"/>
+        <interface id="16" name="fa1/0" type="ethernet" network_id="8"/>
+        <interface id="32" name="fa2/0" type="ethernet" network_id="11"/>
+        <interface id="48" name="fa3/0" type="ethernet" network_id="9"/>
+        <interface id="64" name="fa4/0" type="ethernet" network_id="7"/>
+      </node>
+      <node id="5" name="DIST-R1" type="dynamips" template="c3725" image="c3725-adventerprisek9-mz.124-15.T14.image" idlepc="0x60c08728" nvram="128" ram="256" console="" delay="0" icon="Router-2D-Gen-White-S.svg" config="0" left="90" top="354">
+        <slot id="1" module="NM-1FE-TX"/>
+        <interface id="0" name="fa0/0" type="ethernet" network_id="5"/>
+        <interface id="1" name="fa0/1" type="ethernet" network_id="8"/>
+        <interface id="16" name="fa1/0" type="ethernet" network_id="10"/>
+      </node>
+      <node id="1" name="DIST-R2" type="dynamips" template="c3725" image="c3725-adventerprisek9-mz.124-15.T14.image" idlepc="0x60c08728" nvram="128" ram="256" console="" delay="0" icon="Router-2D-Gen-White-S.svg" config="0" left="312" top="357">
+        <slot id="1" module="NM-1FE-TX"/>
+        <interface id="0" name="fa0/0" type="ethernet" network_id="6"/>
+        <interface id="1" name="fa0/1" type="ethernet" network_id="11"/>
+        <interface id="16" name="fa1/0" type="ethernet" network_id="17"/>
+      </node>
+      <node id="3" name="DIST-R3" type="dynamips" template="c3725" image="c3725-adventerprisek9-mz.124-15.T14.image" idlepc="0x60c08728" nvram="128" ram="256" console="" delay="0" icon="Router-2D-Gen-White-S.svg" config="0" left="513" top="363">
+        <slot id="1" module="NM-1FE-TX"/>
+        <interface id="0" name="fa0/0" type="ethernet" network_id="18"/>
+        <interface id="1" name="fa0/1" type="ethernet" network_id="9"/>
+        <interface id="16" name="fa1/0" type="ethernet" network_id="26"/>
+      </node>
+    </nodes>
+    <networks>
+      <network id="14" type="bridge" name="Net-Linuxiface_2" left="369" top="652" visibility="0" icon="lan.png"/>
+      <network id="15" type="bridge" name="Net-Linuxiface_3" left="369" top="652" visibility="0" icon="lan.png"/>
+      <network id="19" type="bridge" name="Net-Linuxiface_4" left="369" top="652" visibility="0" icon="lan.png"/>
+      <network id="20" type="bridge" name="Net-ACCESS-SW1iface_1" left="150" top="721" visibility="0" icon="lan.png"/>
+      <network id="22" type="bridge" name="Net-ACCESS-SW2iface_1" left="342" top="763" visibility="0" icon="lan.png"/>
+      <network id="28" type="bridge" name="Net-WiFi-APiface_1" left="795" top="715" visibility="0" icon="lan.png"/>
+      <network id="29" type="pnet0" name="Net" left="330" top="21" visibility="1" icon="01-Cloud-Default.svg"/>
+      <network id="23" type="bridge" name="Net-ACCESS-SW2iface_6" left="366" top="781" visibility="0" icon="lan.png"/>
+      <network id="24" type="bridge" name="Net-ACCESS-SW2iface_7" left="366" top="781" visibility="0" icon="lan.png"/>
+      <network id="25" type="bridge" name="Net-ACCESS-SW2iface_4" left="366" top="781" visibility="0" icon="lan.png"/>
+      <network id="27" type="bridge" name="Net-MNGT-2iface_0" left="636" top="808" visibility="0" icon="lan.png"/>
+      <network id="12" type="bridge" name="Net-ASAviface_4" left="378" top="557" visibility="0" icon="lan.png"/>
+      <network id="13" type="bridge" name="Net-ACCESS-SW3iface_1" left="567" top="703" visibility="0" icon="lan.png"/>
+      <network id="16" type="bridge" name="Net-ACCESS-SW3iface_6" left="567" top="703" visibility="0" icon="lan.png"/>
+      <network id="21" type="bridge" name="Net-ACCESS-SW1iface_4" left="162" top="703" visibility="0" icon="lan.png"/>
+      <network id="1" type="bridge" name="Net-ISP-1iface_0" left="129" top="49" visibility="0" icon="lan.png"/>
+      <network id="3" type="bridge" name="Net-EDGE-R1iface_16" left="129" top="160" visibility="0" icon="lan.png"/>
+      <network id="2" type="bridge" name="Net-ISP-2iface_0" left="678" top="52" visibility="0" icon="lan.png"/>
+      <network id="4" type="bridge" name="Net-EDGE-R2iface_16" left="615" top="175" visibility="0" icon="lan.png"/>
+      <network id="7" type="bridge" name="Net-CORE-R1iface_64" left="225" top="259" visibility="0" icon="lan.png"/>
+      <network id="5" type="bridge" name="Net-CORE-R1iface_16" left="225" top="259" visibility="0" icon="lan.png"/>
+      <network id="8" type="bridge" name="Net-DIST-R1iface_1" left="150" top="394" visibility="0" icon="lan.png"/>
+      <network id="10" type="bridge" name="Net-DIST-R1iface_16" left="150" top="394" visibility="0" icon="lan.png"/>
+      <network id="6" type="bridge" name="Net-CORE-R1iface_32" left="225" top="259" visibility="0" icon="lan.png"/>
+      <network id="11" type="bridge" name="Net-CORE-R2iface_32" left="501" top="265" visibility="0" icon="lan.png"/>
+      <network id="17" type="bridge" name="Net-DIST-R2iface_16" left="372" top="397" visibility="0" icon="lan.png"/>
+      <network id="9" type="bridge" name="Net-CORE-R2iface_48" left="501" top="265" visibility="0" icon="lan.png"/>
+      <network id="18" type="bridge" name="Net-CORE-R1iface_48" left="225" top="259" visibility="0" icon="lan.png"/>
+      <network id="26" type="bridge" name="Net-DIST-R3iface_16" left="573" top="403" visibility="0" icon="lan.png"/>
+    </networks>
+  </topology>
+</lab>

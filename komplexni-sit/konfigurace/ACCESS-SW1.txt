@@ -67,7 +67,6 @@ interface GigabitEthernet0/0
  switchport trunk native vlan 999
  switchport trunk allowed vlan 10,20,30,99
  switchport nonegotiate
- spanning-tree guard root
  ip dhcp snooping trust
  ip arp inspection trust
  no shutdown

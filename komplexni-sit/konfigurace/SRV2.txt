@@ -1,0 +1,199 @@
+SRV2
+sudo nano /etc/netplan/01-netcfg.yaml 
+{
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    eth0:
+      dhcp4: no
+      addresses:
+        - 192.168.20.20/24
+      routes:
+        - to: 0.0.0.0/0
+          via: 192.168.20.1
+      nameservers:
+       addresses: [8.8.8.8, 1.1.1.1]
+}
+sudo netplan apply
+sudo apt install isc-dhcp-server
+
+    sudo nano /etc/default/isc-dhcp-server
+    INTERFACESv4="eth0"
+
+    sudo nano /etc/dhcp/dhcpd.conf
+    option domain-name "lab.local";
+    option domain-name-servers 192.168.20.10, 192.168.20.20;
+    default-lease-time 86400;
+    max-lease-time 604800;
+    authoritative;
+
+    # Failover Protocol Declaration (Secondary)
+    failover peer "dhcp-failover" {
+        secondary;
+        address 192.168.20.20;
+        port 647;
+        peer address 192.168.20.10;
+        peer port 647;
+        max-response-delay 30;
+        max-unacked-updates 10;
+        load balance max seconds 3;
+    }
+
+    # VLAN 20 - Servers
+    subnet 192.168.20.0 netmask 255.255.255.0 {
+        option routers 192.168.20.1;
+        pool {
+            failover peer "dhcp-failover";
+            range 192.168.20.50 192.168.20.99;
+        }
+    }
+
+    # VLAN 10 - Users
+    subnet 192.168.10.0 netmask 255.255.255.0 {
+        option routers 192.168.10.1;
+        pool {
+            failover peer "dhcp-failover";
+            range 192.168.10.50 192.168.10.200;
+        }
+    }
+
+    # VLAN 30 - WiFi
+    subnet 192.168.30.0 netmask 255.255.255.0 {
+        option routers 192.168.30.1;
+        pool {
+            failover peer "dhcp-failover";
+            range 192.168.30.50 192.168.30.200;
+        }
+    }
+
+    # VLAN 99 - Management
+    subnet 192.168.99.0 netmask 255.255.255.0 {
+        option routers 192.168.99.1;
+        pool {
+            failover peer "dhcp-failover";
+            range 192.168.99.50 192.168.99.100;
+        }
+    }
+
+sudo apt install bind9
+
+    sudo nano /etc/bind/named.conf.options
+    options {
+        directory "/var/cache/bind";
+
+        allow-query { 127.0.0.1; 192.168.0.0/16; 10.99.99.0/24; 10.0.0.0/8; };
+        recursion yes;
+
+        forwarders {
+            8.8.8.8;
+            1.1.1.1;
+        };
+
+        dnssec-validation auto;
+        listen-on-v6 { any; };
+    };
+
+    sudo nano /etc/bind/named.conf.local
+    zone "lab.local" {
+        type slave;
+        file "/var/cache/bind/db.lab.local";
+        masters { 192.168.20.10; };
+    };
+
+    zone "20.168.192.in-addr.arpa" {
+        type slave;
+        file "/var/cache/bind/db.192.168.20";
+        masters { 192.168.20.10; };
+    };
+
+sudo apt install chrony
+
+    sudo nano /etc/chrony/chrony.conf
+    server 192.168.20.10 iburst
+    allow 192.168.0.0/16
+    local stratum 10
+    sudo chronyc sources
+
+sudo apt install rsyslog
+
+    sudo nano /etc/rsyslog.conf
+    module(load="imudp")
+    input(type="imudp" port="514")
+
+    sudo nano /etc/rsyslog.d/30-remote-network.
+    $template RemoteLogs,"/var/log/network/%HOSTNAME%/%PROGRAMNAME%.log"
+    *.* ?RemoteLogs
+    & stop
+
+    sudo mkdir -p /var/log/network
+    sudo chown -R syslog:adm /var/log/network
+    sudo systemctl restart rsyslog
+    sudo ss -ulnp | grep :514
+
+sudo apt install snmpd
+
+    sudo nano /etc/snmp/snmpd.conf
+    agentAddress udp:161
+
+    # System Information
+    sysLocation    "Lab Rack 1"
+    sysContact     admin@lab.local
+
+    rocommunity labpublic 192.168.0.0/16
+    rocommunity labpublic 10.0.0.0/8
+    rocommunity labpublic 127.0.0.1
+
+    sudo systemctl restart snmpd
+    sudo systemctl status snmpd --no-pager
+
+    snmpwalk -v2c -c labpublic 127.0.0.1 1.3.6.1.2.1.1.1
+
+sudo apt install tftpd-hpa
+
+    sudo nano /etc/default/tftpd-hpa
+    TFTP_USERNAME="tftp"
+    TFTP_DIRECTORY="/srv/tftp"
+    TFTP_ADDRESS=":69"
+    TFTP_OPTIONS="--secure --create"
+
+    sudo mkdir -p /srv/tftp
+    sudo chown -R tftp:tftp /srv/tftp
+    sudo chmod -R 777 /srv/tftp
+    sudo systemctl restart tftpd-hpa
+    sudo systemctl status tftpd-hpa --no-pager
+
+sudo apt install freeradius freeradius-utils
+
+    sudo nano /etc/freeradius/3.0/clients.conf
+        client loopbacks_edge {
+            ipaddr = 1.1.1.0/24
+            secret = RadiusKey123
+            nas_type = cisco
+        }
+
+        client loopbacks_core {
+            ipaddr = 2.2.2.0/24
+            secret = RadiusKey123
+            nas_type = cisco
+        }
+
+        client loopbacks_dist {
+            ipaddr = 3.3.3.0/24
+            secret = RadiusKey123
+            nas_type = cisco
+        }
+
+        client localhost_test {
+            ipaddr = 127.0.0.1
+            secret = RadiusKey123
+        }
+
+    sudo nano /etc/freeradius/3.0/users
+    admin   Cleartext-Password := "AdminSecurePass123"
+            Service-Type = Administrative-User,
+            Cisco-AVPair = "shell:priv-lvl=15"
+
+    sudo systemctl restart freeradius
+    sudo systemctl status freeradius --no-pager
+    radtest admin AdminSecurePass123 127.0.0.1 0 RadiusKey123

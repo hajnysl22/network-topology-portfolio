@@ -1,0 +1,180 @@
+ACCESS-SW2
+enable
+configure terminal
+
+hostname ACCESS-SW2
+ip domain-name lab.local
+service password-encryption
+
+crypto key generate rsa modulus 2048
+ip ssh version 2
+
+login block-for 120 attempts 3 within 60
+login delay 2
+login on-failure log
+login on-success log
+
+ip arp inspection vlan 10,20,30,99
+ip arp inspection validate src-mac dst-mac ip
+
+username admin privilege 15 secret AdminSecurePass123
+
+aaa new-model
+
+radius server SRV2_RADIUS
+ address ipv4 192.168.20.20 auth-port 1812 acct-port 1813
+ key RadiusKey123
+exit
+
+aaa group server radius RADIUS_GROUP
+ server name SRV2_RADIUS
+exit
+
+aaa authentication login default local
+aaa authorization exec default local
+
+vlan 10
+ name Users
+exit
+
+vlan 20
+ name Servers
+exit
+
+vlan 30
+ name WiFi
+exit
+
+vlan 99
+ name Management
+exit
+
+vlan 999
+ name Unused_ports
+exit
+
+spanning-tree portfast default
+spanning-tree portfast bpduguard default
+
+ip dhcp snooping
+ip dhcp snooping vlan 10,20,30,99
+no ip dhcp snooping information option
+
+interface GigabitEthernet0/0
+ description Connection to IPS/IDS
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ interface GigabitEthernet0/0
+ switchport trunk native vlan 999
+ switchport trunk allowed vlan 10,20,30,99
+ switchport nonegotiate
+ ip dhcp snooping trust
+ ip arp inspection trust
+ no shutdown
+exit
+
+interface GigabitEthernet0/1
+ description Connection to VLAN10
+ ip arp inspection limit rate 15
+ spanning-tree bpduguard enable
+ switchport mode access
+ switchport access vlan 10
+ switchport nonegotiate
+ switchport port-security
+ switchport port-security maximum 2
+ switchport port-security mac-address sticky
+ switchport port-security violation restrict
+ switchport port-security aging time 10
+ switchport port-security aging type inactivity
+ no shutdown
+exit
+
+interface GigabitEthernet1/0
+ description Connection to VLAN99
+ ip arp inspection limit rate 15
+ spanning-tree bpduguard enable
+ switchport mode access
+ switchport access vlan 99
+ switchport nonegotiate
+ switchport port-security
+ switchport port-security maximum 2
+ switchport port-security mac-address sticky
+ switchport port-security violation restrict
+ switchport port-security aging time 10
+ switchport port-security aging type inactivity
+ no shutdown
+exit
+
+interface range GigabitEthernet1/2 - 3
+ description Connection to VLAN20
+ ip arp inspection limit rate 100
+ spanning-tree bpduguard enable
+ switchport mode access
+ switchport access vlan 20
+ switchport nonegotiate
+ ip dhcp snooping trust
+ ip arp inspection trust
+ no shutdown
+exit
+
+interface range GigabitEthernet0/2 - 3, GigabitEthernet1/1
+ description Unused Port
+ switchport mode access
+ switchport access vlan 999
+ switchport nonegotiate
+ shutdown
+exit
+
+interface Vlan99
+ description Management SVI
+ ip address 192.168.99.12 255.255.255.0
+ no shutdown
+exit
+
+ip default-gateway 192.168.99.1
+ip tftp source-interface Vlan99
+
+logging host 192.168.20.20
+logging trap informational
+logging source-interface Vlan99
+
+snmp-server community MgtSecureRO_2026 RO ACL_ADMIN_ONLY
+snmp-server host 192.168.20.20 version 2c MgtSecureRO_2026
+snmp-server trap-source Vlan99
+
+ip access-list standard ACL_ADMIN_ONLY
+ permit 192.168.99.0 0.0.0.255
+ permit 192.168.20.0 0.0.0.255
+ deny any log
+exit
+
+line con 0
+ login local
+ exec-timeout 0 0
+exit
+
+line vty 0 4
+ transport input ssh
+ access-class ACL_ADMIN_ONLY in
+exit
+
+line vty 5 15
+ transport input none
+ no exec
+ access-class ACL_ADMIN_ONLY in
+exit
+
+line vty 0 15
+login authentication default
+ authorization exec default
+ exec-timeout 0 0
+exit
+
+end
+
+write
+copy running-config tftp://192.168.20.20/access-sw2.cfg
+
+show ip interface brief
+show interfaces status
+show interfaces trunk

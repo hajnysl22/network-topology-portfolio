@@ -1,0 +1,120 @@
+IPS/IDS (ASAv)
+enable
+configure terminal
+
+    hostname ASAv
+
+    same-security-traffic permit inter-interface
+    same-security-traffic permit intra-interface
+
+    interface GigabitEthernet0/0
+        description Connection to DIST-R1
+        nameif outside-dist1
+        security-level 0
+        ip address 10.0.1.26 255.255.255.252
+        ospf network point-to-point non-broadcast
+        ospf authentication message-digest
+        ospf message-digest-key 1 md5 OspfSecurePass26
+        no shutdown
+    interface GigabitEthernet0/1
+        description Connection to DIST-R2
+        nameif outside-dist2
+        security-level 0
+        ip address 10.0.1.30 255.255.255.252
+        ospf network point-to-point non-broadcast
+        ospf authentication message-digest
+        ospf message-digest-key 1 md5 OspfSecurePass26
+        no shutdown
+    interface GigabitEthernet0/2
+        description Connection to DIST-R3
+        nameif outside-dist3
+        security-level 0
+        ip address 10.0.1.34 255.255.255.252
+        ospf network point-to-point non-broadcast
+        ospf authentication message-digest
+        ospf message-digest-key 1 md5 OspfSecurePass26
+        no shutdown
+    interface GigabitEthernet0/3
+        description Trunk to Linux Firewall
+        nameif management
+        security-level 90
+        ip address 10.99.99.1 255.255.255.0
+        no shutdown
+        exit
+
+    object network OBJ_INTERNAL_NETS
+        subnet 192.168.0.0 255.255.0.0
+        exit
+    object network OBJ_TRANSIT_NET
+        subnet 10.99.99.0 255.255.255.0
+        exit
+    object-group network OG_INSIDE_TRAFFIC
+        network-object object OBJ_INTERNAL_NETS
+        network-object object OBJ_TRANSIT_NET
+        exit
+    object-group network OG_INFRASTRUCTURE
+        network-object 10.0.0.0 255.0.0.0
+        network-object 1.1.1.0 255.255.255.0
+        network-object 2.2.2.0 255.255.255.0
+        network-object 3.3.3.0 255.255.255.0
+        exit
+
+    nat (management,outside-dist1) source static OBJ_INTERNAL_NETS OBJ_INTERNAL_NETS destination static OG_INFRASTRUCTURE OG_INFRASTRUCTURE no-proxy-arp
+    nat (management,outside-dist2) source static OBJ_INTERNAL_NETS OBJ_INTERNAL_NETS destination static OG_INFRASTRUCTURE OG_INFRASTRUCTURE no-proxy-arp
+    nat (management,outside-dist3) source static OBJ_INTERNAL_NETS OBJ_INTERNAL_NETS destination static OG_INFRASTRUCTURE OG_INFRASTRUCTURE no-proxy-arp
+    nat (management,outside-dist1) source dynamic OG_INSIDE_TRAFFIC interface
+    nat (management,outside-dist2) source dynamic OG_INSIDE_TRAFFIC interface
+    nat (management,outside-dist3) source dynamic OG_INSIDE_TRAFFIC interface
+
+    access-list OUTSIDE_IN extended permit ip 10.0.0.0 255.0.0.0 192.168.20.0 255.255.255.0
+    access-list OUTSIDE_IN extended permit ip 1.1.1.0 255.255.255.0 192.168.20.0 255.255.255.0
+    access-list OUTSIDE_IN extended permit udp object-group OG_INFRASTRUCTURE host 192.168.20.20 eq 514
+    access-list OUTSIDE_IN extended permit udp object-group OG_INFRASTRUCTURE host 192.168.20.20 eq 1812
+    access-list OUTSIDE_IN extended permit udp object-group OG_INFRASTRUCTURE host 192.168.20.20 eq 1813
+    access-list OUTSIDE_IN extended permit udp object-group OG_INFRASTRUCTURE host 192.168.20.20 eq 162
+    access-list OUTSIDE_IN extended permit udp object-group OG_INFRASTRUCTURE host 192.168.20.20 eq 69
+    access-list OUTSIDE_IN extended permit icmp any any
+
+    access-group OUTSIDE_IN in interface outside-dist1
+    access-group OUTSIDE_IN in interface outside-dist2
+    access-group OUTSIDE_IN in interface outside-dist3
+
+    route management 192.168.0.0 255.255.0.0 10.99.99.5
+
+    router ospf 1
+        router-id 4.4.4.4
+        log-adj-changes
+        network 10.0.1.24 255.255.255.252 area 0
+        neighbor 10.0.1.25 interface outside-dist1
+        network 10.0.1.28 255.255.255.252 area 0
+        neighbor 10.0.1.29 interface outside-dist2
+        network 10.0.1.32 255.255.255.252 area 0
+        neighbor 10.0.1.33 interface outside-dist3
+        network 10.99.99.0 255.255.255.0 area 0
+        redistribute static subnets
+        exit
+
+    policy-map global_policy
+        class inspection_default
+        inspect icmp
+        inspect tftp
+    service-policy global_policy global
+
+    logging enable
+    logging host management 192.168.20.20
+    logging trap informational
+
+    snmp-server community MgtSecureRO_2026
+    snmp-server host management 192.168.20.20 community MgtSecureRO_2026
+
+    aaa-server RADIUS_GROUP protocol radius
+    aaa-server RADIUS_GROUP (management) host 192.168.20.20
+        key RadiusKey123
+        authentication-port 1812
+        accounting-port 1813
+        exit
+    aaa authentication ssh console LOCAL
+    aaa authentication enable console LOCAL
+    test aaa-server authentication RADIUS_GROUP host 192.168.20.20 username admin password
+
+write memory

@@ -35,5 +35,21 @@ Směrování mezi sítěmi zajišťuje SW1. Díky zapnutému příkazu `ip routi
 - `konfigurace/sw1.txt`: Detailní výpis příkazů pro L3 switch SW1.
 - `konfigurace/sw2.txt`: Detailní výpis příkazů pro L2 switch SW2.
 
+## Ověření funkčnosti
+
+Pro kontrolu správné funkčnosti konfigurace VLAN a Inter-VLAN směrování slouží následující příkazy:
+
+### Kontrola VLAN a portů
+*   `show vlan brief` – Ověření, že VLAN 10, 20 a 30 existují a mají správně přiřazené přístupové (access) porty.
+*   `show interfaces trunk` – Kontrola stavu trunkového propojení na rozhraní `Gi0/1`, použité enkapsulace (802.1Q) a seznamu povolených VLAN.
+
+### Kontrola směrování na L3 switch (SW1)
+*   `show ip interface brief` – Ověření, že virtuální SVI rozhraní (`Vlan10`, `Vlan20`, `Vlan30`) jsou ve stavu `up/up` a mají správně nastavené IP adresy bran.
+*   `show ip route` – Kontrola směrovací tabulky. Musí obsahovat přímo připojené sítě (C/L) pro jednotlivé VLAN subnety.
+
+### Diagnostika a konektivita
+*   `show mac address-table` – Zobrazení tabulky MAC adres a jejich přiřazení do příslušných VLAN.
+*   `ping <IP_adresa>` – Testování konektivity z koncových zařízení na výchozí brány a mezi zařízeními v různých VLAN (ověření Inter-VLAN routingu).
+
 ## Poznámka
 Záměrem tohoto projektu je pouze ukázat konfiguraci VLAN a Inter-VLAN routing. Bezpečnost (např. zabezpečení portů, ACL atd.) zde nebyla v záměru.
